@@ -39,7 +39,7 @@ class AuditLog(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp = models.DateTimeField(auto_now_add=True)
-    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPE_CHOICES)
     performed_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     cd_id = models.UUIDField(null=True, blank=True)
     ccd_id = models.UUIDField(null=True, blank=True)
