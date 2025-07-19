@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import CDEmployee, CCDUser, ClientCD
+from .models import CCDUser, CCDUser, ClientCD
 
 admin.site.register(ClientCD)
-admin.site.register(CDEmployee)
+admin.site.register(CCDUser)
 admin.site.register(CCDUser)
