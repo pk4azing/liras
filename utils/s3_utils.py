@@ -1,10 +1,8 @@
-# utils/s3_utils.py
-
 import boto3
-import os
 import zipfile
 import io
 import json
+from io import BytesIO
 from django.conf import settings
 from botocore.exceptions import ClientError
 
@@ -16,6 +14,20 @@ s3_client = boto3.client(
 )
 
 BUCKET_NAME = "lfras-ccd-data"  # You can also move this to settings or constants
+
+
+def get_file_from_s3(s3_path: str):
+    """
+    Download a file from S3 and return it as a BytesIO object (for FileResponse).
+    """
+    bucket = settings.AWS_STORAGE_BUCKET_NAME
+    try:
+        file_stream = BytesIO()
+        s3_client.download_fileobj(Bucket=bucket, Key=s3_path, Fileobj=file_stream)
+        file_stream.seek(0)
+        return file_stream
+    except ClientError as e:
+        raise Exception(f"S3 download failed: {e.response['Error']['Message']}")
 
 
 # -------- Path Generators --------
