@@ -10,6 +10,7 @@ from utils.audit_logger import log_event
 from utils.file_validation import validate_uploaded_files
 from utils.email_utils import send_email_using_smtp
 from clients.models import ClientCD
+from utils.notification_utils import create_notification
 
 
 class ActivityCreateView(generics.CreateAPIView):
@@ -41,6 +42,13 @@ class ActivityCreateView(generics.CreateAPIView):
         }
         send_email_using_smtp(subject, template_path, self.request.user.email, context, smtp_config)
 
+        # Send notification
+        create_notification(
+            user=self.request.user,
+            message=f"Activity #{activity.id} has been started.",
+            level="Good"
+        )
+
 
 class ActivityDetailView(generics.RetrieveAPIView):
     serializer_class = ActivityDetailSerializer
@@ -65,7 +73,7 @@ class FileUploadView(generics.CreateAPIView):
         if not files:
             return Response({"error": "No files provided."}, status=400)
 
-        config_path = activity.ccd_user.client.config_s3_path
+        config_path = activity.ccd_user.client_cd.config_s3_path
         config_dict = read_json_from_s3(config_path)
         expected_file_names = [f["name"] for f in config_dict.get("files", [])]
         validation_results = validate_uploaded_files(files, config_path)
@@ -119,15 +127,22 @@ class FileUploadView(generics.CreateAPIView):
                 context={"activity_id": activity.id, "zip_path": zip_path}
             )
 
-            client = ClientCD.objects.get(id=activity.ccd_user.client.id)
+            client = ClientCD.objects.get(id=activity.ccd_user.client_cd.id)
             subject = "Activity Completed"
-            template_path = activity.ccd_user.client.email_template_s3_path
-            smtp_config = activity.ccd_user.client.email_config
+            template_path = activity.ccd_user.client_cd.config_s3_path
+            smtp_config = activity.ccd_user.client_cd.email_config_s3_path
             context = {
-                "user": request.user.name,
+                "user": request.user.get_full_name(),
                 "activity_id": activity.id,
                 "zip_link": zip_path
             }
             send_email_using_smtp(subject, template_path, request.user.email, context, smtp_config)
+
+            # Send notification
+            create_notification(
+                user=request.user,
+                message=f"Activity #{activity.id} has been completed. Zip file is ready.",
+                level="Good"
+            )
 
         return Response({"validation_results": validation_results}, status=200)

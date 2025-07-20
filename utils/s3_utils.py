@@ -12,7 +12,7 @@ s3_client = boto3.client(
     's3',
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_REGION
+    region_name=settings.AWS_S3_REGION_NAME
 )
 
 BUCKET_NAME = "lfras-ccd-data"  # You can also move this to settings or constants
@@ -81,6 +81,22 @@ def upload_file_to_activity(ccd_id, activity_id, filename, file_obj):
     except ClientError as e:
         print(f"[S3 Upload Activity File Error] {e}")
         return None
+
+
+def upload_report_to_s3(file_name, content):
+    """
+    Uploads a report (as plain text) to the reports folder in S3.
+    Returns the full S3 path if successful, else None.
+    """
+    try:
+        s3_path = generate_report_path("global", file_name)  # You can replace 'global' with CD_ID or CCD_ID if needed
+        file_obj = io.BytesIO(content.encode("utf-8"))
+        s3_client.upload_fileobj(file_obj, BUCKET_NAME, s3_path)
+        return s3_path
+    except ClientError as e:
+        print(f"[Report Upload Error] {e}")
+        return None
+
 
 
 def read_json_from_s3(s3_path):

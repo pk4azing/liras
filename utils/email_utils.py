@@ -5,9 +5,10 @@ import boto3
 import logging
 from django.conf import settings
 from string import Template
-from utils.audit_logger import log_audit_event
+from utils.audit_logger import log_event
 
 logger = logging.getLogger(__name__)
+
 
 def load_email_template_from_s3(bucket_name, template_path):
     s3 = boto3.client('s3')
@@ -19,6 +20,7 @@ def load_email_template_from_s3(bucket_name, template_path):
         logger.error(f"Failed to fetch email template from S3: {e}")
         return None
 
+
 def render_template(template_str, context):
     try:
         template = Template(template_str)
@@ -27,10 +29,15 @@ def render_template(template_str, context):
         logger.error(f"Error rendering template: {e}")
         return None
 
-def send_email_using_smtp(subject, recipient, context, template_s3_path, smtp_config, audit_user=None):
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-    template_str = load_email_template_from_s3(bucket_name, template_s3_path)
 
+def send_email_using_smtp(subject, recipient, context, template_s3_path, smtp_config, audit_user=None):
+    try:
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    except AttributeError:
+        logger.error("AWS_STORAGE_BUCKET_NAME is not defined in settings.")
+        return False
+
+    template_str = load_email_template_from_s3(bucket_name, template_s3_path)
     if not template_str:
         logger.warning(f"Template at {template_s3_path} not found. Skipping email.")
         return False
@@ -59,19 +66,25 @@ def send_email_using_smtp(subject, recipient, context, template_s3_path, smtp_co
         server.sendmail(message['From'], [recipient], message.as_string())
         server.quit()
 
-        log_audit_event(
-            user=audit_user,
-            action="EMAIL_SENT",
-            description=f"Email sent to {recipient} using template {template_s3_path}"
+        log_event(
+            event_type="EMAIL_SENT",
+            performed_by=audit_user,
+            context={
+                "recipient": recipient,
+                "template": template_s3_path
+            }
         )
-
         return True
 
     except Exception as e:
         logger.error(f"Failed to send email to {recipient}: {e}")
-        log_audit_event(
-            user=audit_user,
-            action="EMAIL_FAILED",
-            description=f"Failed to send email to {recipient}. Reason: {e}"
+        log_event(
+            event_type="EMAIL_FAILED",
+            performed_by=audit_user,
+            context={
+                "recipient": recipient,
+                "template": template_s3_path,
+                "error": str(e)
+            }
         )
         return False

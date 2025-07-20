@@ -30,7 +30,9 @@ urlpatterns = [
     # App routes
     path('api/auth/', include('auth_cdccd.urls')),
     path('api/clients/', include('clients.urls')),
-    path('api/activity/', include('activity.urls')),  # ✅ Activity app routes added
+    path('api/activity/', include('activity.urls')),
+    path('api/reports/', include('reports.urls')),
+    path('api/notifications/', include('notifications.urls')),
 
     # API Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

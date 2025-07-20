@@ -25,7 +25,7 @@ class Activity(models.Model):
     zip_s3_path = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Activity {self.id} by {self.ccd_user.user.email}"
+        return f"Activity {self.id} by {self.ccd_user.email}"
 
 
 class ActivityFile(models.Model):
