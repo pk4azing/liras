@@ -1,0 +1,294 @@
+<div class="section-body">
+  <div class="container-fluid" appCdModeDirective>
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="header-action">
+        <h1 class="page-title">{{homeTitle}}</h1>
+      </div>
+      <ul class="nav nav-tabs page-header-tab">
+        <li class="nav-item"><a class="nav-link active" data-toggle="tab">{{homeTitle}}</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="section-body">
+  <button (click)="goBack()" mat-icon-button class="scale-125">
+    <mat-icon style="color: #000;">keyboard_backspace</mat-icon>
+  </button>
+</div>
+
+@if (editMode) {
+<div class="p-6 max-w-2xl mb-6 mx-auto bg-stone-50 rounded-lg shadow-md animate__fadeIn animate__animated">
+  <!-- Edit Ticket Header -->
+  <div class="mb-8 text-center">
+    <h2 class="text-2xl font-bold text-emerald-900 relative inline-block">
+      Edit Ticket
+      <span class="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500 transform scale-x-75"></span>
+    </h2>
+    <p class="mt-2 text-sm text-gray-500">Update the ticket details below</p>
+  </div>
+
+  <form [formGroup]="editTicketForm">
+    <!-- Ticket Title Field -->
+    <div class="relative z-0 w-full mb-5 group">
+      <input type="text" id="floating_title" formControlName="description"
+        class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-900 peer"
+        placeholder=" " required />
+      <label for="floating_title"
+        class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-emerald-900 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+        Ticket Summary
+      </label>
+      <div class="text-red-500 text-sm mt-1"
+        *ngIf="editTicketForm.get('description')?.touched && editTicketForm.get('description')?.errors?.['required']">
+        Ticket Title is required
+      </div>
+    </div>
+
+    <!-- Description Field -->
+    <div class="relative z-0 w-full mb-5 group">
+      <textarea id="floating_description" formControlName="detailedDescription"
+        class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-900 peer"
+        placeholder=" " required></textarea>
+      <label for="floating_description"
+        class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-emerald-900 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+        Description
+      </label>
+      <div class="text-red-500 text-sm mt-1"
+        *ngIf="editTicketForm.get('detailedDescription')?.touched && editTicketForm.get('detailedDescription')?.errors?.['required']">
+        Description is required
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-4">
+      <button mat-stroked-button type="button" (click)="cancelEdit()"
+        class="border-gray-300 text-gray-700 hover:bg-gray-50">
+        Cancel
+      </button>
+      <button mat-stroked-button type="submit" (click)="saveChanges()"
+        [disabled]="editTicketForm.invalid || !editTicketForm.dirty"
+        class="border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</div>
+}
+
+
+<div class="container-fluid p-4 mt-2">
+
+  <!-- Main Content Row -->
+  <div class="row g-4">
+    <!-- Left Column (Ticket Description) -->
+    <div class="col-lg-8">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <h2 class="h3 fw-bold text-gray-800 mb-0">{{ ticketDetails?.description }}</h2>
+            @if (!editMode) {
+            <button class="btn" (click)="enableEditMode()" aria-label="Edit ticket">
+              <mat-icon>edit</mat-icon>
+            </button>
+            }
+          </div>
+
+          <div class="mb-4">
+            <h3 class="h5 fw-semibold text-gray-700 mb-2">Description</h3>
+            <p #description class="text-gray-600 mb-0">{{ ticketDetails?.detailedDescription }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column (Ticket Metadata) -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <!-- Status -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-gray-700 mb-2">Status</label>
+            <div class="alert alert-info py-2 mb-0">
+              <strong>{{ ticketDetails?.status || 'Unspecified' }}</strong>
+            </div>
+          </div>
+
+          <h3 class="h5 fw-semibold border-bottom pb-2 mb-3">Details</h3>
+
+          <!-- Assigned To -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-gray-700 mb-1">Assigned To</label>
+            <div class=" p-2 rounded">
+              {{ ticketDetails?.cdassigned_to || 'Unassigned' }}
+            </div>
+          </div>
+
+          <!-- Severity -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-gray-700 mb-1">Severity</label>
+            <div class=" p-2 rounded">
+              {{ ticketDetails?.priority || 'Unspecified' }}
+            </div>
+          </div>
+
+          <!-- Reporter -->
+          <div class="mb-0">
+            <label class="form-label fw-semibold text-gray-700 mb-1">Reporter</label>
+            <div class=" p-2 rounded">
+              {{ ticketDetails?.created_by || 'Unspecified' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Section -->
+  <div class="mt-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="h5 fw-semibold mb-4">Activity</h3>
+
+        <!-- Comment Input -->
+        <div class="mb-5">
+          <div class="card border-0">
+            <div class="card-body p-3">
+              <textarea class="form-control mb-2" [(ngModel)]="newComment" placeholder="Add comment..."
+                rows="4"></textarea>
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-secondary btn-sm" (click)="newComment=''">Cancel</button>
+                <button class="btn btn-primary btn-sm" [disabled]="isCommentEmpty()"
+                  (click)="postNewComment()">Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Activity Feed -->
+        <div class="activity-feed">
+          <ng-container *ngFor="let activity of activities; let i = index">
+            <!-- Activity Item Container -->
+            <div class="activity-item mb-3" [ngClass]="{
+              'ps-3 border-start border-3 border-info': activity.type !== 'comment',
+              'ps-2': activity.type === 'comment'
+            }">
+
+              <!-- Created Issue -->
+              <div *ngIf="activity.type === 'created'" class="card border-0 mb-3">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-wrap align-items-center gap-2 small text-muted">
+                    <span class="fw-semibold text-muted">{{activity.user}}</span>
+                    <span>created the</span>
+                    <span class="fw-semibold">{{activity.field}}</span>
+                    <span class="ms-auto">{{activity.timestamp}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status/Assignee/Severity Changes -->
+              <div *ngIf="['status', 'assignee', 'severity'].includes(activity.type)" class="card  border-0 mb-3">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-wrap align-items-center gap-2 small text-muted mb-2">
+                    <span class="fw-semibold text-muted">{{activity.user}}</span>
+                    <span>changed the</span>
+                    <span class="fw-semibold">{{activity.field}}</span>
+                    <span class="ms-auto">{{activity.timestamp}}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-info">{{activity.fromValue}}</span>
+                    <mat-icon>arrow_right_alt</mat-icon>
+                    <span class="badge bg-info">{{activity.toValue}}</span>
+                  </div>
+
+                  <!-- Comment Section for Assignee Changes -->
+                  <div *ngIf="(activity.comment || editingCommentIndex === i) && activity.type === 'comment'"
+                    class="mt-3">
+                    <!-- DISPLAY MODE (only if not editing) -->
+                    <ng-container *ngIf="editingCommentIndex !== i">
+                      <div class="d-flex align-items-start gap-2">
+                        <span class="fw-semibold">Comment:</span>
+                        <p class="mb-0 flex-grow-1 rounded p-1"
+                          [matTooltip]="canEdit(activity.user) ? 'Click to edit' : ''"
+                          (click)="canEdit(activity.user) ? tryStartEditing(i) : null"
+                          [class.cursor-pointer]="canEdit(activity.user)"
+                          [class.cursor-default]="!canEdit(activity.user)" [class.text-muted]="!canEdit(activity.user)">
+                          {{ activity.comment }}
+                        </p>
+                      </div>
+                    </ng-container>
+
+                    <!-- EDIT MODE (only if allowed and editing) -->
+                    <ng-container *ngIf="editingCommentIndex === i && canEdit(activity.user)">
+                      <div class="mt-2">
+                        <label class="form-label fw-semibold">Comment</label>
+                        <textarea class="form-control mb-2" [(ngModel)]="activity.comment" rows="3"></textarea>
+                        <div class="d-flex justify-content-end gap-2">
+                          <button class="btn btn-outline-secondary btn-sm" (click)="cancelEditing(i)">Cancel</button>
+                          <button class="btn btn-primary btn-sm"
+                            [disabled]="!isCommentChanged(i) || !activity.comment?.trim()" (click)="updateComment(i)">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+
+
+
+                </div>
+              </div>
+
+              <!-- Was Assigned -->
+              <div *ngIf="activity.type === 'assigned'" class="card  border-0 mb-3">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-wrap align-items-center gap-2 small text-muted">
+                    <span class="fw-semibold text-muted">{{activity.user}}</span>
+                    <span>was assigned to this</span>
+                    <span class="fw-semibold">{{activity.field}}</span>
+                    <span class="ms-auto">{{activity.timestamp}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comment Activity -->
+              <div *ngIf="activity.type === 'comment'" class="card border-0 mb-3">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-wrap align-items-center gap-2 small text-muted mb-2">
+                    <span class="fw-semibold text-muted">{{ activity.user }}</span>
+                    <span>commented</span>
+                    <span class="ms-auto">{{ activity.timestamp }}</span>
+                  </div>
+
+                  <div *ngIf="activity.comment || editingCommentIndex === i">
+                    <ng-container *ngIf="editingCommentIndex !== i">
+                      <div class="d-flex align-items-start gap-2  p-2 rounded">
+                        <span class="fw-semibold">Comment:</span>
+                        <p class="mb-0 flex-grow-1 cursor-pointer" matTooltip="Edit Comment" (click)="tryStartEditing(i)">
+                          {{ activity.comment }}
+                        </p>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="editingCommentIndex === i">
+                      <div class="mt-2">
+                        <label class="form-label fw-semibold">Comment</label>
+                        <textarea class="form-control mb-2" [(ngModel)]="activity.comment" rows="3"></textarea>
+                        <div class="d-flex justify-content-end gap-2">
+                          <button class="btn btn-outline-secondary btn-sm" (click)="cancelEditing(i)">Cancel</button>
+                          <button class="btn btn-primary btn-sm"
+                            [disabled]="!isCommentChanged(i) || !activity.comment?.trim()"
+                            (click)="updateComment(i)">Submit</button>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,159 @@
+.brand-namemi {
+  background: linear-gradient(145deg,
+      #2185d0,
+      #de5d83);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.curr-text {
+  color: #6c757d !important;
+}
+
+.iconcolor .metismenu>li .fa-dashboard {
+  color: #fbbd08;
+}
+
+.iconcolor .metismenu>li .fa-line-chart {
+  color: #2185d0;
+}
+
+.iconcolor .metismenu>li .fa-cogs {
+  color: #a333c8;
+}
+
+.theme-azure .page-title {
+  color: #45aaf2;
+}
+
+.theme-indigo .page-title {
+  color: #6435c9;
+}
+
+.theme-purple .page-title {
+  color: #a333c8;
+}
+
+.theme-orange .page-title {
+  color: #f2711c;
+}
+
+.theme-green .page-title {
+  color: #21ba45;
+}
+
+.theme-cyan .page-title {
+  color: #17a2b8;
+}
+
+.theme-blush .page-title {
+  color: #de5d83;
+}
+
+// header top brand logo color
+#header_top .brand-logo {
+  opacity: 1;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// brand logo color
+
+.theme-azure #header_top .brand-logo {
+  fill: #45aaf2;
+}
+
+.theme-indigo #header_top .brand-logo {
+  fill: #6435c9;
+}
+
+.theme-purple #header_top .brand-logo {
+  fill: #a333c8;
+}
+
+.theme-orange #header_top .brand-logo {
+  fill: #f2711c;
+}
+
+.theme-green #header_top .brand-logo {
+  fill: #21ba45;
+}
+
+.theme-cyan #header_top .brand-logo {
+  fill: #17a2b8;
+}
+
+.theme-blush #header_top .brand-logo {
+  fill: #de5d83;
+}
+
+:host ::ng-deep .dark-mode .calendar.fc .fc-toolbar h2 {
+  color: #c8cfd6;
+}
+:host ::ng-deep .dark-mode
+  .calendar.fc
+  .fc-view-container
+  .fc-view.fc-basic-view
+  > table
+  tbody
+  tr
+  td.fc-widget-content,
+:host ::ng-deep .dark-mode
+  .calendar.fc
+  .fc-view-container
+  .fc-view.fc-agenda
+  > table
+  tbody
+  tr
+  td.fc-widget-content,
+:host ::ng-deep .dark-mode
+  .calendar.fc
+  .fc-view-container
+  .fc-view.fc-basic-view
+  .fc-body
+  .fc-row
+  .fc-bg,
+:host ::ng-deep .dark-mode
+  .calendar.fc
+  .fc-view-container
+  .fc-view.fc-agenda
+  .fc-body
+  .fc-row
+  .fc-bg {
+  border-color: #343a40 !important;
+}
+:host ::ng-deep .dark-mode .calendar.fc .fc-view-container .fc-other-month {
+  background: #272c31;
+}
+
+:host ::ng-deep .calendar.fc .fc-view-container .fc-view.fc-agenda > table > thead tr td.fc-widget-header {
+  color: #333537;
+  background: #e8e9e9;
+  border: 1px solid #f8f9fa;
+  padding: 10px;
+}
+
+.fc-col-header-cell {
+  color: #333537;
+  background: #e8e9e9;
+  border: 1px solid #f8f9fa;
+  padding: 10px !important;
+}
+
+.fc-col-header-cell-cushion {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.fc-daygrid-day-number {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.fc-event-title {
+  white-space: pre-wrap;
+}

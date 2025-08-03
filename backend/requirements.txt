@@ -1,0 +1,26 @@
+Django>=4.2,<4.3
+djangorestframework>=3.14.0
+psycopg2-binary>=2.9.6
+gunicorn>=20.1.0
+django-cors-headers>=4.0.0
+django-cron
+djangorestframework-simplejwt
+python-decouple>=3.8
+boto3>=1.26.0
+django-storages>=1.14.0
+whitenoise>=6.5.0
+drf-yasg
+pytest
+django-test
+
+# Email & Auth
+django-crispy-forms>=2.0
+django-allauth>=0.58.0
+
+# S3 Utils
+botocore>=1.29.0
+
+# Optional (but useful during dev)
+ipython
+black
+flake8

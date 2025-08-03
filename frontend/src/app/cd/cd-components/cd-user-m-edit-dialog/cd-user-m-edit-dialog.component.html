@@ -1,0 +1,78 @@
+<div appCdModeDirective>
+  <div class="p-4 overflow-auto col">
+    <h3 class="h5 fw-semibold border-bottom mb-4">Edit User</h3>
+    <form [formGroup]="userForm" (ngSubmit)="onSave()">
+      <!-- Username (disabled) -->
+      <div class="mb-3">
+        <label>Name</label>
+        <input type="text" formControlName="username" class="form-control" />
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" formControlName="email" class="form-control"
+          [ngClass]="{'is-invalid': userForm.get('email')?.invalid && userForm.get('email')?.touched}" />
+        <div class="invalid-feedback" *ngIf="userForm.get('email')?.hasError('required')">
+          Email is required
+        </div>
+        <div class="invalid-feedback"
+          *ngIf="userForm.get('email')?.hasError('email') || userForm.get('email')?.hasError('pattern')">
+          Invalid email format
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="mb-3">
+        <label>Phone</label>
+        <ngx-intl-tel-input [preferredCountries]="[CountryISO.India, CountryISO.UnitedStates]"
+          [enableAutoCountrySelect]="true" [enablePlaceholder]="true" [searchCountryFlag]="true"
+          [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]" [selectFirstCountry]="false"
+          [selectedCountryISO]="selectedCountryISO" [phoneValidation]="true" [separateDialCode]="true"
+          [numberFormat]="PhoneNumberFormat.National" formControlName="phone" class="w-100">
+        </ngx-intl-tel-input>
+        <div class="invalid-feedback d-block" *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
+          Valid phone number is required
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="mb-3">
+        <label>Status</label>
+        <select formControlName="status" class="form-select"
+          [ngClass]="{'is-invalid': userForm.get('status')?.invalid && userForm.get('status')?.touched}">
+          <option value="">Select status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <div class="invalid-feedback">Status is required</div>
+      </div>
+
+      <!-- Role -->
+      <div class="mb-3">
+        <label>Role</label>
+        <select formControlName="role" class="form-select"
+          [ngClass]="{'is-invalid': userForm.get('role')?.invalid && userForm.get('role')?.touched}">
+          <option value="">Select role</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="sales">Sales</option>
+        </select>
+        <div class="invalid-feedback">Role is required</div>
+      </div>
+
+
+      <!-- Associated Client -->
+      <div class="mb-3" *ngIf="userForm.get('role')?.value === 'sales'">
+        <label>Associated Client</label>
+        <input type="text" formControlName="associatedClient" class="form-control" />
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

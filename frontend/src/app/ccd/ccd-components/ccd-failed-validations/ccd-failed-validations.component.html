@@ -1,0 +1,73 @@
+<div class="card">
+    <div class="table-responsive">
+  
+      <ng-container *ngIf="dataSource.data.length > 0; else noData">
+        <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="table table-hover table-vcenter table-striped table-custom mb-0">
+  
+          <!-- Dynamic Column Definitions -->
+          <ng-container matColumnDef="{{ column }}" *ngFor="let column of displayedColumns">
+            <th mat-header-cell *matHeaderCellDef class="table-header text-wrap">
+              {{ getHeader(column) }}
+            </th>
+            <td mat-cell *matCellDef="let element" class="tablerowtd align-middle">
+              <ng-container *ngIf="column !== 'action' && column !== 'uploadedDate' && column !== 'fileName'; else handleSpecialColumns">
+                {{ element[column] }}
+              </ng-container>
+  
+              <ng-template #handleSpecialColumns>
+                <ng-container *ngIf="column === 'uploadedDate'; else checkFileNameOrAction">
+                  {{ element.uploadedDate | date: 'shortDate' }}
+                </ng-container>
+  
+                <ng-template #checkFileNameOrAction>
+                  <ng-container *ngIf="column === 'fileName'; else refreshButton">
+                    <span [title]="element.fileName" class="d-inline-block">
+                      {{ element.fileName.length > 12 ? (element.fileName | slice: 0:12) + '...' : element.fileName }}
+                    </span>
+                  </ng-container>
+  
+                  <ng-template #refreshButton>
+                    <button class="icobtn" mat-icon-button (click)="handleRetryClick(); $event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                    </button>
+                  </ng-template>
+                </ng-template>
+              </ng-template>
+            </td>
+          </ng-container>
+  
+          <!-- Expanded Row for Fail Message -->
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell class="p-0 border-0" *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+              <div class="example-element-detail-wrapper"
+                   [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                <div class="example-activity-detail text-danger border-top">
+                  <strong>Operation of "{{ element.fileName }}" Failed:</strong>
+                  {{ element.failReason }}
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+          <!-- Row Definitions -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  
+          <tr mat-row *matRowDef="let element; columns: displayedColumns"
+              class="example-element-row cursor-pointer"
+              [class.example-expanded-row]="expandedElement === element"
+              (click)="expandedElement = expandedElement === element ? null : element">
+          </tr>
+  
+          <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+        </table>
+      </ng-container>
+  
+      <ng-template #noData>
+        <div class="text-center py-4 text-muted">
+          <i class="fa fa-ban me-2"></i> No failed validations to display.
+        </div>
+      </ng-template>
+  
+    </div>
+  </div>
+  

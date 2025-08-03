@@ -1,0 +1,335 @@
+// table {
+//     width: 100%;
+//   }
+
+//   tr.example-detail-row {
+//     height: 0;
+//   }
+
+//   tr.example-activity-row:not(.example-expanded-row):hover {
+//     background: whitesmoke;
+//   }
+
+//   tr.example-activity-row:not(.example-expanded-row):active {
+//     background: #efefef;
+//   }
+
+//   .example-activity-row td {
+//     border-bottom-width: 0;
+//   }
+
+//   .example-activity-detail {
+//     overflow: hidden;
+//     display: flex;
+//   }
+
+//   .example-activity-diagram {
+//     min-width: 80px;
+//     border: 2px solid black;
+//     padding: 8px;
+//     font-weight: lighter;
+//     margin: 8px 0;
+//     height: 104px;
+//   }
+
+//   .example-activity-symbol {
+//     font-weight: bold;
+//     font-size: 40px;
+//     line-height: normal;
+//   }
+
+//   .example-activity-description {
+//     padding: 16px;
+//   }
+
+//   .example-activity-description-attribution {
+//     opacity: 0.5;
+//   }
+
+//   .icobtn {
+//     background-color: #fabf7a !important;
+//     color: #013b17 !important;
+//     &:hover {
+//       background-color: #013b17 !important;
+//       color: #fff !important;
+//     }
+//   }
+
+//   .tablerowc {
+//     background-color: antiquewhite !important;
+//   }
+
+//   .childtr {
+//     background-color: #ffed86 !important;
+//   }
+
+//   .childtrd {
+//     background-color: #cccccc !important;
+//   }
+
+//   .tablerowtd {
+//     // background-color: oklch(70.4% 0.191 22.216) !important;
+//     background-color: #013b17 !important;
+//     color: white !important;
+//   }
+
+//   .dlbtn {
+//     background-color: #FABF7A !important;
+//     color: #013B17 !important;
+//     &:hover {
+//       background-color: #013B17 !important;
+//       color: #fff !important;
+//     }
+//   }
+
+//   .zdlbtn {
+//     background-color: #FABF7A !important;
+//     color: #013B17 !important;
+//     &:hover {
+//       background-color: #c69861 !important;
+//       color: #fff !important;
+//     }
+//   }
+
+// table {
+//   width: 40%;
+// }
+
+// tr.example-detail-row {
+//   height: 0;
+// }
+
+// tr.example-activity-row:not(.example-expanded-row):hover {
+//   background: whitesmoke;
+// }
+
+// tr.example-activity-row:not(.example-expanded-row):active {
+//   background: #efefef;
+// }
+
+// .example-activity-row td {
+//   border-bottom-width: 0;
+// }
+
+// .example-activity-detail {
+//   overflow: hidden;
+//   display: flex;
+// }
+
+// .example-activity-diagram {
+//   min-width: 80px;
+//   border: 2px solid black;
+//   padding: 8px;
+//   font-weight: lighter;
+//   margin: 8px 0;
+//   height: 104px;
+// }
+
+// .example-activity-symbol {
+//   font-weight: bold;
+//   font-size: 40px;
+//   line-height: normal;
+// }
+
+// .example-activity-description {
+//   padding: 16px;
+// }
+
+// .example-activity-description-attribution {
+//   opacity: 0.5;
+// }
+
+// .icobtn {
+//   background-color: #e0a25b !important;
+//   color: #013b17 !important;
+
+//   &:hover {
+//     background-color: #013b17 !important;
+//     color: #fff !important;
+//   }
+// }
+
+// .tablerowc {
+//   background-color: red !important;
+// }
+
+// .tablerowtd {
+//   background-color: oklch(70.4% 0.191 22.216) !important;
+//   color: blue !important;
+// }
+
+// .theme-azure .page-title {
+//   color: #45aaf2;
+// }
+
+// .theme-indigo .page-title {
+//   color: #6435c9;
+// }
+
+// .theme-purple .page-title {
+//   color: #a333c8;
+// }
+
+// .theme-orange .page-title {
+//   color: #f2711c;
+// }
+
+// .theme-green .page-title {
+//   color: #21ba45;
+// }
+
+// .theme-cyan .page-title {
+//   color: #17a2b8;
+// }
+
+// .theme-blush .page-title {
+//   color: #de5d83;
+// }
+
+// .theme-blush .tablerowc {
+//   background-color: pink !important;
+// }
+
+// .theme-cyan .tablerowc {
+//   color: #17a2b8 !important;
+// }
+
+
+// Row styling
+tr.example-detail-row {
+  height: 0 !important;
+}
+
+tr.example-activity-row:not(.example-expanded-row):hover {
+  // background: #ffe6e6; // light red hover
+  transition: background 0.2s ease;
+}
+
+// tr.example-activity-row:not(.example-expanded-row):active {
+//   background: #f5cfcf;
+// }
+
+.example-activity-row td {
+  // border-bottom: 1px solid #f3baba;
+  padding: 12px;
+}
+
+// Expanded row styling
+.example-activity-detail {
+  display: flex;
+  padding: 16px;
+  // background-color: #fff5f5;
+  // border-left: 4px solid #de3163;
+  // color: #721c24;
+  font-size: 14px;
+  font-style: italic;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.example-activity-diagram {
+  min-width: 80px;
+  // border: 2px dashed #de3163;
+  padding: 8px;
+  font-weight: lighter;
+  margin: 8px 0;
+  height: 104px;
+  border-radius: 4px;
+}
+
+.example-activity-symbol {
+  font-weight: bold;
+  font-size: 40px;
+  // color: #c0392b;
+}
+
+.example-activity-description {
+  padding: 16px;
+  // color: #a94442;
+}
+
+.example-activity-description-attribution {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+// Refresh button style
+.icobtn {
+  color: #fff !important;
+  border-radius: 4px;
+
+  &:hover {
+    color: red !important;
+  }
+}
+
+// Optional tag for highlighting rows
+.tablerowc {
+  // background-color: #ffcccc !important;
+  color: black !important;
+}
+
+.tablerowtd {
+  // background-color: #fff0f0 !important;
+  // color: #c0392b !important;
+  font-weight: 500;
+}
+
+// .example-element-detail {
+//   background-color: #de3163 !important;
+// }
+
+// .expandedDetail {
+//   background-color: #de3163 !important;
+// }
+
+.mat-mdc-table {
+  background-color: unset !important;
+}
+
+.table {
+  td {
+    cursor: pointer;
+  }
+}
+
+.dark-div {
+  .textcol {
+    color: #fff !important;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.light-div {
+  .textcol {
+    color: #000 !important;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+:host ::ng-deep .mat-table,
+:host ::ng-deep .mat-header-cell,
+:host ::ng-deep .mat-cell {
+  font-family: inherit !important;
+}

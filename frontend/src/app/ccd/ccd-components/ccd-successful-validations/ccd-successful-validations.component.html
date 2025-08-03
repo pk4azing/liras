@@ -1,0 +1,50 @@
+<div class="card">
+
+    <div class="table-responsive">
+        <ng-container *ngIf="dataSource.data.length > 0; else noData">
+            <table mat-table [dataSource]="dataSource"
+                class="table table-hover table-vcenter table-striped table-custom mb-0">
+                <!-- ID Column -->
+                <ng-container matColumnDef="activityId">
+                    <th mat-header-cell *matHeaderCellDef class="table-header">ID</th>
+                    <td mat-cell *matCellDef="let element" class="border-0">{{element.activityId}}</td>
+                </ng-container>
+
+                <!-- File Name Column -->
+                <ng-container matColumnDef="fileName">
+                    <th mat-header-cell *matHeaderCellDef>File Name</th>
+                    <td mat-cell *matCellDef="let element" class="cursor-pointer border-0">
+                        <span *ngIf="element.fileName.length > 12" [title]="element.fileName">
+                            {{ element.fileName.substring(0, 12) }}...
+                        </span>
+                        <span *ngIf="element.fileName.length <= 12">
+                            {{ element.fileName }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Uploaded Date Column -->
+                <ng-container matColumnDef="uploadedDate">
+                    <th mat-header-cell *matHeaderCellDef class="table-header">Uploaded Date</th>
+                    <td mat-cell *matCellDef="let element" class="border-0">{{element.uploadedDate | date: 'shortDate'}}</td>
+                </ng-container>
+
+                <!-- Expiry Date Column -->
+                <ng-container matColumnDef="expiryDate">
+                    <th mat-header-cell *matHeaderCellDef class="table-header">Expiry Date</th>
+                    <td mat-cell *matCellDef="let element" class="border-0">{{element.expiryDate | date: 'shortDate'}}</td>
+                </ng-container>
+
+                <!-- Header and Row Definitions -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </ng-container>
+
+        <ng-template #noData>
+            <div class="text-center py-4 text-muted">
+                <i class="fa fa-ban me-2"></i> No successful validations to display.
+            </div>
+        </ng-template>
+    </div>
+</div>

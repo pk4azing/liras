@@ -1,0 +1,139 @@
+<div class="font-muli theme-blush close_rightbar">
+
+    <div class="auth option2 d-flex align-items-center justify-content-center min-vh-100 bg-light">
+        <div class="auth_left" style="width: 100%; max-width: 420px;">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <a class="header-brand text-decoration-none" href="index.html">
+                            <i class="fa fa-lock fs-1 text-primary"></i>
+                        </a>
+                        <h1 class="card-title mt-3 mb-2 fs-3 fw-bold">
+                            {{ ForgotPassword ? 'Reset your password' : 'Login to your account' }}
+                        </h1>
+                    </div>
+
+                    <!-- Login Form -->
+                    <!-- Login Form -->
+                    <form *ngIf="!ForgotPassword; else forgotForm" class="needs-validation" novalidate
+                        (ngSubmit)="onSubmit()">
+
+                        <!-- 🔴 Global Error Message from Server -->
+                        <div class="alert alert-danger py-2 px-3 mb-3"
+                            *ngIf="errorMessage() && submitted && email.valid && password.valid">
+                            {{ errorMessage() }}
+                        </div>
+
+                        <!-- Alert for required fields -->
+                        <div class="alert alert-danger py-2 px-3 mb-4"
+                            *ngIf="submitted && (email.invalid || password.invalid)">
+                            Email and Password are required fields. Please fill them in correctly.
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label visually-hidden">Email address</label>
+                            <input type="email" class="form-control form-control-lg py-2" id="email"
+                                placeholder="Enter email" [formControl]="email" required />
+                            <div class="invalid-feedback d-block"
+                                *ngIf="email.invalid && (email.dirty || email.touched)">
+                                {{ errorMessage() }}
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="password" class="form-label visually-hidden">Password</label>
+                                <a (click)="toggleForgotPassword()" class="small text-decoration-none">Forgot
+                                    password?</a>
+                            </div>
+                            <div class="input-group">
+                                <input [type]="hide[0]() ? 'password' : 'text'" id="password"
+                                    class="form-control form-control-lg py-2 textcol" placeholder="Password"
+                                    autocomplete="current-password" [formControl]="password" required />
+                                <button class="btn btn-outline-secondary" type="button" (click)="clickEvent(0, $event)">
+                                    <i class="fa" [ngClass]="hide[0]() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback d-block mt-1" *ngIf="submitted && password.invalid">
+                                Password is required
+                            </div>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" />
+                                <label class="form-check-label small" for="rememberMe">Remember me</label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg py-2" type="submit">Sign in</button>
+                        </div>
+                    </form>
+
+
+
+                    <!-- Forgot Password Form -->
+                    <ng-template #forgotForm>
+                        <div class="p-4 p-md-5 bg-white rounded shadow-sm">
+                            <ng-container *ngIf="!submitted; else confirmationScreen">
+                                <!-- Reset Password Header -->
+                                <div class="text-center mb-4">
+                                    <p class="text-muted small">Enter your email to receive a reset link</p>
+                                </div>
+
+                                <!-- Email Input -->
+                                <div class="mb-4">
+                                    <label for="forgotEmail" class="form-label visually-hidden">Email address</label>
+                                    <input type="email" class="form-control form-control-lg py-2" id="forgotEmail"
+                                        placeholder="you@example.com" [formControl]="email" required />
+                                    <div class="invalid-feedback d-block" *ngIf="email.touched && email.errors">
+                                        <span *ngIf="email.hasError('required')">Email is required</span>
+                                        <span *ngIf="email.hasError('email') || email.hasError('pattern')">Please enter
+                                            a valid email</span>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        (click)="toggleForgotPassword()">Cancel</button>
+                                    <button type="button" class="btn btn-primary" [disabled]="!email.valid"
+                                        (click)="onForgotSubmit()">
+                                        Send Reset Link
+                                    </button>
+                                </div>
+                            </ng-container>
+
+                            <div *ngIf="errorMessage()" class="text-danger mt-2">
+                                {{ errorMessage() }}
+                            </div>
+
+
+                            <!-- Confirmation Message -->
+                            <ng-template #confirmationScreen>
+                                <div class="text-center py-4">
+                                    <div class="mx-auto mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                        style="width: 60px; height: 60px;">
+                                        <i class="fa fa-envelope text-success fs-4"></i>
+                                    </div>
+                                    <h2 class="h5 fw-bold text-success mb-2">Check Your Email</h2>
+                                    <p class="text-muted small">
+                                        If the email matches our records, you'll receive a password reset link shortly.
+                                    </p>
+                                    <button type="button" class="btn btn-success mt-3 w-100"
+                                        (click)="toggleForgotPassword()">Return to Login</button>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </ng-template>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,67 @@
+<div appCdModeDirective>
+  <div class="p-4 overflow-auto overflow-x-hidden col">
+    <h3 class="h5 fw-semibold border-bottom mb-4">Add New Client</h3>
+    <form [formGroup]="userform" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+      <div class="mb-3">
+        <label class="mb-1">Client Name</label>
+        <input type="text" formControlName="clientName" class="form-control"
+          [ngClass]="{ 'is-invalid': userform.get('clientName')?.invalid && userform.get('clientName')?.touched }" />
+        <div class="invalid-feedback" *ngIf="userform.get('clientName')?.hasError('required')">
+          Client name is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="mb-1">Email</label>
+        <input type="email" formControlName="clientEmail" class="form-control"
+          [ngClass]="{ 'is-invalid': userform.get('clientEmail')?.invalid && userform.get('clientEmail')?.touched }" />
+        <div class="invalid-feedback" *ngIf="userform.get('clientEmail')?.hasError('required')">
+          Email is required
+        </div>
+        <div class="invalid-feedback"
+          *ngIf="userform.get('clientEmail')?.hasError('email') || userform.get('clientEmail')?.hasError('pattern')">
+          Please enter a valid email address
+        </div>
+      </div>
+
+      <div class="card splstyles">
+        <div class="mb-3">
+          <label class="mb-1">Phone Number</label>
+          <ngx-intl-tel-input [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true"
+            [enablePlaceholder]="true" [searchCountryFlag]="true"
+            [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]" [selectFirstCountry]="false"
+            [selectedCountryISO]="CountryISO.India" [maxLength]="15" [phoneValidation]="true" [separateDialCode]="true"
+            [numberFormat]="PhoneNumberFormat.National" name="clientPhone" formControlName="clientPhone" class="w-100">
+          </ngx-intl-tel-input>
+          <div class="invalid-feedback d-block"
+            *ngIf="userform.get('clientPhone')?.invalid && userform.get('clientPhone')?.touched">
+            Valid phone number is required
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="mb-1">Client Address</label>
+        <input type="text" formControlName="clientAddress" class="form-control"
+          [ngClass]="{ 'is-invalid': userform.get('clientAddress')?.invalid && userform.get('clientAddress')?.touched }" />
+        <div class="invalid-feedback" *ngIf="userform.get('clientAddress')?.hasError('required')">
+          Address is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="mb-1">Joined Date</label>
+        <input type="date" formControlName="joinedDate" class="form-control"
+          [ngClass]="{ 'is-invalid': userform.get('joinedDate')?.invalid && userform.get('joinedDate')?.touched }" />
+        <div class="invalid-feedback" *ngIf="userform.get('joinedDate')?.hasError('required')">
+          Joined date is required
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="userform.invalid">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

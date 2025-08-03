@@ -1,0 +1,134 @@
+<div class="card">
+    <div class="card-body">
+        <form class="mx-auto mb-4" style="max-width: 500px;" (submit)="clearSearch($event)">
+            <label for="default-search" class="form-label visually-hidden">Search</label>
+            <div class="position-relative">
+                <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
+                    <i class="fa fa-search"></i>
+                </span>
+                <input type="search" id="default-search" name="searchTerm" [(ngModel)]="searchTerm"
+                    (input)="applyFilter($event)" class="form-control ps-5" placeholder="Search by name or ID..."
+                    style="padding-right: 90px;" />
+
+                <button type="submit"
+                    class="btn btn-primary btn-sm position-absolute top-50 end-0 translate-middle-y me-2">
+                    Clear
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+<div class="card mb-0">
+    <div class="table-responsive rounded">
+        <ng-container *ngIf="dataSource.data.length > 0; else noData">
+          
+          <ng-container *ngIf="dataSource.filteredData.length > 0; else noResultsFound">
+            <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
+                class="table table-hover table-vcenter table-striped table-custom mb-0" appCdModeDirective>
+      
+              <!-- Select Column -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-checkbox (change)="$event ? selectAll($event) : null"></mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox [(ngModel)]="element.select" (change)="onCheckBoxChange()"></mat-checkbox>
+                </td>
+              </ng-container>
+      
+              <!-- Username Column -->
+              <ng-container matColumnDef="username">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.username }}
+                </td>
+              </ng-container>
+      
+              <!-- Email Column -->
+              <ng-container matColumnDef="email">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Email</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.email }}
+                </td>
+              </ng-container>
+      
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.status }}
+                </td>
+              </ng-container>
+      
+              <!-- Role Column -->
+              <ng-container matColumnDef="role">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Role</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.role }}
+                </td>
+              </ng-container>
+      
+              <!-- Phone Column -->
+              <ng-container matColumnDef="phone">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Phone</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.phone }}
+                </td>
+              </ng-container>
+      
+              <!-- Associated Client Column -->
+              <ng-container matColumnDef="associatedClient">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Client</th>
+                <td mat-cell *matCellDef="let element" class="border-0 textcol">
+                  {{ element.associatedClient || '-' }}
+                </td>
+              </ng-container>
+      
+              <!-- Action Column -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef>Action</th>
+                <td mat-cell *matCellDef="let element" class="border-0">
+                  <button type="button" class="btn btn-icon btn-sm" title="Edit"
+                      (click)="onEditClick(element.username)">
+                    <i class="fa fa-edit"></i>
+                  </button>
+                  <button type="button" class="btn btn-icon btn-sm js-sweetalert" title="Delete"
+                      data-type="confirm" (click)="onDeleteUser(element.username)">
+                    <i class="fa fa-trash-o text-danger"></i>
+                  </button>
+                </td>
+              </ng-container>
+      
+              <!-- Header and Row Definitions -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+      
+            <div appCdModeDirective>
+              <mat-paginator class="custom-paginator" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons [pageSize]="5">
+              </mat-paginator>
+            </div>
+          </ng-container>
+        </ng-container>
+      
+        <!-- No Results Found after Filtering -->
+        <ng-template #noResultsFound>
+          <div class="text-center py-4 text-muted">
+            <i class="fa fa-search me-2"></i>
+            No matching results found.
+            <div class="mt-3">
+              <button class="btn btn-outline-secondary btn-sm" (click)="clearSearch($event)">Clear Search</button>
+            </div>
+          </div>
+        </ng-template>
+      
+        <!-- No Data at All -->
+        <ng-template #noData>
+          <div class="text-center py-4 text-muted">
+            <i class="fa fa-ban me-2"></i> No users to display.
+          </div>
+        </ng-template>
+      </div>
+      
+</div>

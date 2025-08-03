@@ -1,0 +1,61 @@
+<div appCdModeDirective>
+
+  <ng-container *ngIf="activities && activities.length > 0; else noData">
+    <div class="table-responsive rounded">
+      <table mat-table [dataSource]="activities" multiTemplateDataRows
+        class="table table-hover table-striped table-custom mb-0">
+
+        <!-- Dynamic column defs -->
+        <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+          <th mat-header-cell class="table-h" *matHeaderCellDef>{{ getHeader(column) }}</th>
+          <td class="table-td" mat-cell *matCellDef="let activity">
+            <ng-container [ngSwitch]="column">
+              <ng-container *ngSwitchCase="'date'">
+                {{ activity[column] | date: 'shortDate' }}
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                {{ activity[column] }}
+              </ng-container>
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <!-- Expanded Detail Row -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let activity" [attr.colspan]="displayedColumns.length">
+            <div class="expanded-activity-detail"
+              [@detailExpand]="activity == expandedActivity ? 'expanded' : 'collapsed'">
+              <div class="d-flex align-items-center justify-content-between p-2">
+                <span class="flex-grow-1 table-td">
+                  {{ activity.description }} at {{ activity.date | date: 'short' }}
+                </span>
+                @if (activity.activityType === 'Upload') {
+                <button mat-icon-button (click)="downloadFile(activity)" class="ms-4 icobtn">
+                  <mat-icon>cloud_download</mat-icon>
+                </button>
+                }
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Header & Data Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let activity; columns: displayedColumns;" class="example-activity-row cursor-pointer"
+          [class.table-active]="expandedActivity === activity"
+          (click)="expandedActivity = expandedActivity === activity ? null : activity">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- No Data Template -->
+  <ng-template #noData>
+    <div class="text-center text-muted py-4">
+      <p class="mb-0">No activity data available.</p>
+    </div>
+  </ng-template>
+
+</div>

@@ -1,0 +1,185 @@
+.add-media-text {
+  color: #000000;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.media-upload-table {
+  font-size: 13px;
+  color: #222222;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-top: -10px;
+}
+
+.media-upload-table tbody>tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.remove-media-txt {
+  color: #363636;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.first-progress {
+  height: 10px;
+  width: 100%;
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.second-progress {
+  height: 10px;
+  background: #43ade5;
+  border-radius: 4px;
+}
+
+@media (max-width: 610px) {
+  .media-upload-table-container {
+    width: 200px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+  .media-upload-container {
+    margin-left: 25%;
+    margin-right: 25%;
+  }
+
+  .media-file-name {
+    width: 90px;
+  }
+}
+
+@media (min-width: 610px) and (max-width: 791px) {
+  .media-upload-table-container {
+    width: 250px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 20px;
+    margin-right: 10px;
+  }
+
+  .media-upload-container {
+    margin-left: 25%;
+    margin-right: 25%;
+  }
+
+  .media-file-name {
+    width: 78px;
+  }
+}
+
+@media (min-width: 790px) and (max-width: 1010px) {
+  .media-upload-table-container {
+    width: 400px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 30px;
+    margin-right: 10px;
+  }
+
+  .media-upload-container {
+    margin-left: 25%;
+    margin-right: 25%;
+  }
+
+  .media-file-name {
+    width: 85px;
+  }
+}
+
+@media (min-width: 1010px) and (max-width: 1281px) {
+  .media-progress-bar {
+    width: 250px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 40px;
+    margin-right: 20px;
+  }
+
+  .media-upload-container {
+    margin-left: 25%;
+    margin-right: 25%;
+  }
+
+  .media-file-name {
+    width: 144px;
+  }
+}
+
+@media (min-width: 1281px) and (max-width: 1380px) {
+  .media-upload-table-container {
+    width: 650px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 55px;
+    margin-right: 20px;
+  }
+
+  .media-progress-bar {
+    width: 268px;
+  }
+
+  .media-upload-container {
+    margin-left: 25%;
+    margin-right: 25%;
+  }
+
+  .media-file-name {
+    width: 150px;
+  }
+}
+
+@media (min-width: 1381px) and (max-width: 8000px) {
+  .media-upload-table-container {
+    width: 800px;
+  }
+
+  .media-upload-check {
+    margin-top: 2px;
+    margin-left: 100px;
+    margin-right: 20px;
+  }
+
+  .media-progress-bar {
+    width: 298px;
+  }
+
+  .media-upload-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .media-file-name {
+    width: 165px;
+  }
+}
+
+.dark-div {
+  .filenameclass {
+    color: #000000 !important;
+  }
+}
+
+.light-div {
+
+  .headclass {
+    color: #000000 !important;
+  }
+
+}

@@ -1,0 +1,119 @@
+// .somecol {
+//     background-color: red;
+// }
+
+// .mat-mdc-paginator-container {
+//     background-color: inherit !important;
+// }
+
+// .mat-mdc-paginator-container {
+//     background-color: inherit !important;
+// }
+
+.dark-div {
+
+    .textcol {
+        color: white;
+    }
+
+    .custom-paginator {
+        background-color: #2b3036;
+
+        .mat-paginator-container {
+            background-color: inherit;
+        }
+
+        .mat-mdc-paginator-page-size-label {
+            color: white;
+        }
+
+        .mat-mdc-select-value-text {
+            color: white;
+        }
+
+        .mat-mdc-paginator-range-label {
+            color: white;
+        }
+
+        .mat-mdc-select-arrow {
+            color: white;
+        }
+
+
+    }
+}
+
+.light-div {
+
+    .textcol {
+        color: initial;
+    }
+
+    .custom-paginator {
+        background-color: unset;
+
+        .mat-paginator-container {
+            background-color: inherit;
+        }
+
+        .mat-mdc-paginator-page-size-label {
+            color: initial;
+        }
+
+        .mat-mdc-select-value-text {
+            color: initial;
+        }
+
+        .mat-mdc-paginator-range-label {
+            color: initial;
+        }
+
+        .mat-mdc-select-arrow {
+            color: initial;
+        }
+
+    }
+
+
+}
+
+.editbtntp {
+    color: #2b7fff !important;
+    opacity: 0.8;
+
+    &:hover {
+        color: #1447e6;
+        opacity: 1;
+    }
+}
+
+.deletebtntp {
+    color: #ff1f57 !important;
+    opacity: 0.8;
+    &:hover {
+        color: #c70036;
+        opacity: 1;
+    }
+}
+
+.mat-mdc-table {
+    background-color: unset !important;
+}
+
+// Custom dialog container
+.custom-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 0.5rem !important; // Matches Bootstrap's rounded-3
+    padding: 0; // Remove default padding to let content control spacing
+    overflow: hidden; // Prevent content from bleeding outside rounded corners
+  }
+  
+  // Custom backdrop
+  .custom-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  // Ensure form elements fit properly
+  .custom-dialog-container .mat-mdc-dialog-content {
+    max-height: 85vh;
+    padding: 1.5rem;
+  }

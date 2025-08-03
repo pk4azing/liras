@@ -1,0 +1,58 @@
+/* Style for all toggle switches */
+.toggleSwitch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 48px;
+    height: 24px;
+    background-color: rgb(199, 199, 199);
+    border-radius: 24px;
+    cursor: pointer;
+    transition-duration: 0.3s;
+  }
+
+  input[type="checkbox"] {
+    display: none;
+  }
+  
+  
+  .toggleSwitch::after {
+    content: "";
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    left: 0px;
+    background: conic-gradient(
+      rgb(104, 104, 104),
+      white,
+      rgb(104, 104, 104),
+      white,
+      rgb(104, 104, 104)
+    );
+    border-radius: 50%;
+    transition-duration: 0.3s;
+    box-shadow: 5px 2px 7px rgba(8, 8, 8, 0.308);
+  }
+  
+  /* When the specific checkbox is checked, move the toggle */
+  input[type="checkbox"]:checked + .toggleSwitch {
+    background-color: rgb(153, 197, 151);
+  }
+  
+  input[type="checkbox"]:checked + .toggleSwitch::after {
+    transform: translateX(100%);
+  }
+
+  .dark-div {
+    .textcols {
+        color: #9aa0ac !important;
+    }
+  }
+
+  .light-div {
+    .textcols { 
+        color: #9aa0ac !important;
+    }
+  }
+  

@@ -1,0 +1,78 @@
+/* Light mode styles */
+.bg-light-hover {
+  background-color: rgba(222, 226, 230, 0.3);
+  border-color: #dee2e6;
+}
+
+.hover-bg-gray-100:hover {
+  background-color: #f8f9fa;
+}
+
+/* Dark mode styles */
+.dark .bg-dark-hover {
+  background-color: rgba(33, 37, 41, 0.5);
+  border-color: #495057;
+}
+
+.dark .hover-bg-gray-700:hover {
+  background-color: #495057;
+}
+
+.dark .bg-warning-dark {
+  background-color: #e0a800;
+  /* Slightly darker warning color */
+}
+
+.dark .hover-bg-success-dark:hover {
+  background-color: #014421;
+  /* Darker green for dark mode */
+}
+
+/* Shared transition styles */
+.bg-light-hover,
+.bg-dark-hover,
+.hover-bg-gray-100,
+.hover-bg-gray-700,
+.hover-bg-success,
+.hover-bg-success-dark {
+  transition: all 0.2s ease;
+}
+
+/* Text colors */
+.dark .text-primary-light {
+  color: #85d1ff;
+}
+
+/* File list item hover states */
+.hover-bg-success:hover {
+  background-color: #013B17;
+}
+
+.dark .hover-bg-success-dark:hover {
+  background-color: #014421;
+}
+
+/* Other utility classes (same as before) */
+.text-white-80 {
+  opacity: 0.8;
+}
+
+.text-white-70 {
+  opacity: 0.7;
+}
+
+.hover-text-white:hover {
+  color: white !important;
+}
+
+.hover-bg-white-20:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.mat-mdc-dialog-surface {
+  background-color: none !important;
+}
+
+.bgw {
+  background-color: white !important;
+}

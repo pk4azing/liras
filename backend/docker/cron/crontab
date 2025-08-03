@@ -1,0 +1,2 @@
+# Run cron task every day at 1 AM CST (7 AM UTC)
+0 7 * * * root /app/docker/cron/run_cron.sh >> /var/log/cron.log 2>&1

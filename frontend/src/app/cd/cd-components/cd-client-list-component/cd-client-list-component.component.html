@@ -1,0 +1,241 @@
+<div class="container mx-auto p-1 lg:p-4">
+  <!-- Search Form -->
+  <form class="mx-auto mb-4" style="max-width: 500px;" (submit)="onSearch($event)">
+    <label for="default-search" class="form-label visually-hidden">Search</label>
+    <div class="position-relative">
+      <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+          viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.242 1.104a5.5 5.5 0 1 1 0-11 
+                5.5 5.5 0 0 1 0 11z" />
+        </svg>
+      </span>
+      <input type="search" id="default-search" name="searchTerm" [(ngModel)]="searchTerm" class="form-control ps-5"
+        placeholder="Search by name or ID..." (input)="onSearch($event)" />
+      <button type="submit" (click)="clearSearch()"
+        class="btn btn-primary btn-sm position-absolute top-50 end-0 translate-middle-y me-2">
+        Clear
+      </button>
+    </div>
+  </form>
+
+  <!-- Client List -->
+  <div class="card">
+    <div class="card-body" appCdModeDirective>
+
+      <mat-accordion class="space-y-4" *ngIf="filteredClients.length > 0; else noResults">
+        <mat-expansion-panel *ngFor="let client of filteredClients" class="expanel">
+          <mat-expansion-panel-header class="hover:bg-amber-200">
+            <mat-panel-title class="font-normal text-amber-900">
+              <div>
+                <p>
+                  <b>ID:</b> {{ client.id }}&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  <b>Name:</b> {{ client.name }}
+                  <span class="hidden lg:inline">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<b>Joined Date:</b>
+                    {{
+                    client.joinedDate | date:'shortDate' }}</span>
+                </p>
+              </div>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <ng-template matExpansionPanelContent>
+            <mat-tab-group class="mt-2" mat-align-tabs="start" animationDuration="0ms" appCdModeDirective>
+              <mat-tab label="Client Info" class="client-info-tab">
+                <ng-template matTabContent>
+                  <div class="container py-4">
+                    <section class="bg-white border rounded-3 shadow-sm p-4 p-md-5">
+                      <h2 class="h4 fw-semibold mb-4 text-dark">Client Information</h2>
+                      <div class="row g-4">
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">ID:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.id }}</span>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">Domain Name:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.domainName
+                              }}</span>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">Last Activity:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.lastActivity
+                              }}</span>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">Start Date:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.startDate |
+                              date: 'shortDate' }}</span>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">Expiry Date:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.expiryDate |
+                              date: 'shortDate' }}</span>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                          <div class="d-flex flex-column">
+                            <span class="fw-medium text-muted">Files Uploaded:</span>
+                            <span class="fs-6 text-dark fw-medium">{{ client.filesUploaded
+                              }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="container-fluid p-4">
+                    <!-- Name Field -->
+                    <div class="row mb-3 align-items-center">
+                      <label class="col-sm-3 col-md-2 col-form-label text-sm-end">Name:</label>
+                      <div class="col-sm-9 col-md-10">
+                        <div *ngIf="!client.isEditingName" class="d-flex align-items-center justify-content-between">
+                          <span>{{ client.name }}</span>
+                          <button class="btn btn-link btn-sm" (click)="enableNameEditing(client)">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                        </div>
+                        <div *ngIf="client.isEditingName" class="d-flex gap-2">
+                          <input type="text" class="form-control" [(ngModel)]="client.tempName" />
+                          <button class="btn btn-success btn-sm" (click)="saveName(client)">
+                            <i class="fa fa-check"></i>
+                          </button>
+                          <button class="btn btn-danger btn-sm" (click)="cancelNameEditing(client)">
+                            <i class="fa fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="row mb-3 align-items-center">
+                      <label class="col-sm-3 col-md-2 col-form-label text-sm-end">Email:</label>
+                      <div class="col-sm-9 col-md-10">
+                        <div *ngIf="!client.isEditingEmail" class="d-flex align-items-center justify-content-between">
+                          <span>{{ client.email }}</span>
+                          <button class="btn btn-link btn-sm" (click)="enableEmailEditing(client)">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                        </div>
+                        <div *ngIf="client.isEditingEmail" class="d-flex gap-2">
+                          <input type="email" class="form-control" [(ngModel)]="client.tempEmail" />
+                          <button class="btn btn-success btn-sm" (click)="saveEmail(client)">
+                            <i class="fa fa-check"></i>
+                          </button>
+                          <button class="btn btn-danger btn-sm" (click)="cancelEmailEditing(client)">
+                            <i class="fa fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Phone Field -->
+                    <div class="row mb-3 align-items-center">
+                      <label class="col-sm-3 col-md-2 col-form-label text-sm-end">Phone:</label>
+                      <div class="col-sm-9 col-md-10">
+                        <div *ngIf="!client.isEditingPhone" class="d-flex align-items-center justify-content-between">
+                          <span>{{ client.phone | internationalPhone }}</span>
+                          <button class="btn btn-link btn-sm" (click)="enablePhoneEditing(client)">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                        </div>
+                        <div *ngIf="client.isEditingPhone" [formGroup]="clientForms[client.id]">
+                          <ngx-intl-tel-input formControlName="phone" [preferredCountries]="preferredCountries"
+                            [enableAutoCountrySelect]="true" [enablePlaceholder]="true" [searchCountryFlag]="true"
+                            [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                            [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.India" [maxLength]="15"
+                            [phoneValidation]="true" [separateDialCode]="true"
+                            [numberFormat]="PhoneNumberFormat.International" class="form-control w-100">
+                          </ngx-intl-tel-input>
+                          <div class="mt-2 text-danger"
+                            *ngIf="clientForms[client.id].get('phone')?.touched && clientForms[client.id].get('phone')?.invalid">
+                            Please enter a valid phone number
+                          </div>
+                          <div class="d-flex justify-content-end gap-2 mt-2">
+                            <button class="btn btn-outline-secondary btn-sm"
+                              (click)="cancelPhoneEditing(client)">Cancel</button>
+                            <button class="btn btn-primary btn-sm" (click)="savePhone(client)"
+                              [disabled]="clientForms[client.id].invalid">Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Address Field -->
+                    <div class="row mb-3 align-items-start">
+                      <label class="col-sm-3 col-md-2 col-form-label text-sm-end">Address:</label>
+                      <div class="col-sm-9 col-md-10">
+                        <div *ngIf="!client.isEditingAddress" class="d-flex align-items-center justify-content-between">
+                          <span>{{ client.address }}</span>
+                          <button class="btn btn-link btn-sm" (click)="enableAddressEditing(client)">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                        </div>
+                        <div *ngIf="client.isEditingAddress" class="d-flex flex-column gap-2">
+                          <textarea class="form-control" [(ngModel)]="client.tempAddress"></textarea>
+                          <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm" (click)="saveAddress(client)">
+                              <i class="fa fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" (click)="cancelAddressEditing(client)">
+                              <i class="fa fa-times"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Joined Date Field -->
+                    <div class="row mb-3 align-items-center">
+                      <label class="col-sm-3 col-md-2 col-form-label text-sm-end">Joined Date:</label>
+                      <div class="col-sm-9 col-md-10">
+                        <input type="text" class="form-control" [value]="client.joinedDate" disabled />
+                      </div>
+                    </div>
+                  </div>
+
+                </ng-template>
+              </mat-tab>
+
+              <mat-tab label="Client Activity">
+                <ng-template matTabContent>
+                  <div class="p-4">
+                    <app-cd-client-activity [clientId]="client.id" />
+                  </div>
+                </ng-template>
+              </mat-tab>
+
+              <mat-tab label="Client Settings">
+                <ng-template matTabContent>
+                  <app-cd-client-activity-upload />
+                </ng-template>
+              </mat-tab>
+            </mat-tab-group>
+          </ng-template>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!-- No Results Template -->
+  <ng-template #noResults>
+    <div class="text-center p-4 bg-opacity-10 rounded">
+      <p class="text-warning fw-semibold mb-2">No clients found matching your search.</p>
+      <button (click)="clearSearch()" class="btn btn-link text-warning p-0">
+        Clear search
+      </button>
+    </div>
+  </ng-template>
+</div>

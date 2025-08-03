@@ -1,0 +1,60 @@
+<div class="card mb-0">
+  <div class="overflow-x-auto">
+    <table class="table table-hover table-vcenter table-striped table-custom mb-0" appCdModeDirective>
+      <thead>
+        <tr>
+          <th class="text-center">Role</th>
+          <th class="text-center">User Management</th>
+          <th class="text-center">Client Management</th>
+          <th class="text-center">Role Management</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles" class="text-center">
+          <td class="textcols">{{ role.name }}</td>
+
+          <!-- User Management -->
+          <td>
+            <div class="d-flex justify-content-center align-items-center">
+              <input type="checkbox" id="feature1-toggle-{{ role.id }}" #toggle1 [checked]="role.permissions.feature1"
+                (click)="$event.stopPropagation()" (change)="onFeatureToggle(toggle1.checked, role.id, 'feature1')" />
+              <label class="toggleSwitch" [for]="'feature1-toggle-' + role.id">
+              </label>
+            </div>
+          </td>
+
+          <!-- Client Management -->
+          <td>
+            <div class="d-flex justify-content-center align-items-center">
+              <input type="checkbox" id="feature2-toggle-{{ role.id }}" #toggle2 [checked]="role.permissions.feature2"
+                (click)="$event.stopPropagation()" (change)="onFeatureToggle(toggle2.checked, role.id, 'feature2')" />
+              <label class="toggleSwitch" [for]="'feature2-toggle-' + role.id">
+              </label>
+            </div>
+          </td>
+
+          <!-- Role Management -->
+          <td>
+            <div class="d-flex justify-content-center align-items-center">
+              <input type="checkbox" id="feature3-toggle-{{ role.id }}" #toggle3 [checked]="role.permissions.feature3"
+                (click)="$event.stopPropagation()" (change)="onFeatureToggle(toggle3.checked, role.id, 'feature3')" />
+              <label class="toggleSwitch" [for]="'feature3-toggle-' + role.id">
+              </label>
+            </div>
+          </td>
+
+          <td class="d-flex justify-content-center align-items-center">
+            <button type="button"
+              class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center gap-2"
+              (click)="onDeleteRole(role.id)" aria-label="Delete">
+              <i class="fa fa-trash"></i>
+              <span class="d-none d-md-inline">Delete</span>
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

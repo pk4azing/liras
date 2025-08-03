@@ -1,0 +1,78 @@
+<div class="p-3 m-4 mx-auto bg-white rounded-3 shadow">
+    <!-- Form Header -->
+    <div class="mb-4 text-center">
+      <h2 class="h2 fw-bold text-success position-relative d-inline-block">
+        Create New Role
+        <span class="position-absolute bottom-0 start-0 w-100 h-1 bg-warning" style="transform: scaleX(0.75);"></span>
+      </h2>
+      <p class="mt-2 text-muted small">Define role permissions and access levels</p>
+    </div>
+
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()" class="px-3 pb-3">
+      <!-- Name Field -->
+      <div class="mb-4 form-floating">
+        <input type="text" id="floating_name" formControlName="name"
+          class="form-control border-0 border-bottom rounded-0" placeholder="Role Name" required>
+        <label for="floating_name" class="text-muted">Role Name</label>
+        <div class="invalid-feedback d-block" *ngIf="f['name'].touched && f['name'].errors?.['required']">
+          Role Name is required
+        </div>
+      </div>
+
+      <!-- Permissions Section -->
+      <div class="mb-4">
+        <h3 class="h5 fw-semibold text-body mb-3 d-flex align-items-center">
+          <mat-icon class="me-2 text-body-secondary" style="width:20px;height:20px;font-size:20px;">lock</mat-icon>
+          Permissions
+        </h3>
+        <div class="vstack gap-3 ps-2">
+          <!-- Feature 1 -->
+          <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 hover-bg-light-subtle">
+            <div>
+              <label for="feature1-toggle" class="form-label small fw-medium">User Management</label>
+              <p class="text-muted small mt-1">Manage system users and profiles</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="feature1-toggle"
+                [checked]="permissions.get('feature1')?.value" (change)="onFeatureToggle('feature1')">
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 hover-bg-light-subtle">
+            <div>
+              <label for="feature2-toggle" class="form-label small fw-medium">Client Management</label>
+              <p class="text-muted small mt-1">Manage client accounts and data</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="feature2-toggle"
+                [checked]="permissions.get('feature2')?.value" (change)="onFeatureToggle('feature2')">
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 hover-bg-light-subtle">
+            <div>
+              <label for="feature3-toggle" class="form-label small fw-medium">Role Management</label>
+              <p class="text-muted small mt-1">Configure system roles and permissions</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="feature3-toggle"
+                [checked]="permissions.get('feature3')?.value" (change)="onFeatureToggle('feature3')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex justify-content-end gap-3 mt-4">
+        <button mat-stroked-button type="button" (click)="onCancel()" class="btn btn-outline-secondary px-3 py-1">
+          Cancel
+        </button>
+        <button mat-stroked-button type="submit" [disabled]="roleForm.invalid"
+          class="btn btn-outline-success px-3 py-1">
+          Create Role
+        </button>
+      </div>
+    </form>
+  </div>

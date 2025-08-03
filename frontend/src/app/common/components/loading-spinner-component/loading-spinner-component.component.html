@@ -1,0 +1,7 @@
+<div class="overlay-backdrop" *ngIf="loadingService.isLoading | async">
+  <mat-progress-spinner
+    mode="indeterminate"
+    diameter="50"
+    color="primary"
+  ></mat-progress-spinner>
+</div>

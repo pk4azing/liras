@@ -1,0 +1,198 @@
+<div class="section-body">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="header-action">
+                <h1 class="page-title">{{homeTitle}}</h1>
+            </div>
+            <ul class="nav nav-tabs page-header-tab">
+                <li class="nav-item"><a class="nav-link active" data-toggle="tab">Profile</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="section-body mt-4">
+    <div class="container py-4">
+        <div class="row g-4">
+
+            <!-- Update Profile -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="h5 fw-semibold border-bottom pb-2 mb-4">Update Profile</h3>
+                        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+                            <!-- Name -->
+                            <div class="mb-3 form-group">
+                                <label for="name" class="form-label">Name</label>
+                                <div appCcdModeDirective>
+                                    <input type="text" id="name" formControlName="name" class="form-control textcol"
+                                        [ngClass]="{'is-invalid': profileForm.get('name')?.invalid && profileForm.get('name')?.touched}" />
+                                </div>
+                                <div class="invalid-feedback" *ngIf="profileForm.get('name')?.hasError('required')">
+                                    Name is required
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+
+                            <div class="input-container facs w-100 border rounded p-4 mb-3"
+                                style="background: linear-gradient(135deg, #393E46, #948979); max-width: 28rem;">
+                                <label class="form-label text-white mb-2">Phone</label>
+                                <ngx-intl-tel-input [preferredCountries]="preferredCountries"
+                                    [enableAutoCountrySelect]="true" [enablePlaceholder]="true"
+                                    [searchCountryFlag]="true"
+                                    [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                                    [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.India"
+                                    [maxLength]="15" [phoneValidation]="true" [separateDialCode]="true"
+                                    [numberFormat]="PhoneNumberFormat.National" name="phone" formControlName="phone"
+                                    (input)="onPhoneChange()">
+                                </ngx-intl-tel-input>
+                            </div>
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <div appCcdModeDirective>
+                                    <input type="email" id="email" formControlName="email" class="form-control textcol"
+                                        [ngClass]="{'is-invalid': profileForm.get('email')?.invalid && profileForm.get('email')?.touched}" />
+                                </div>
+                                <div class="invalid-feedback" *ngIf="profileForm.get('email')?.hasError('required')">
+                                    Email is required
+                                </div>
+                                <div class="invalid-feedback" *ngIf="profileForm.get('email')?.hasError('email')">
+                                    Please enter a valid email
+                                </div>
+                            </div>
+
+                            <!-- City -->
+                            <div class="mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <div appCcdModeDirective>
+                                    <input type="text" id="city" formControlName="city" class="form-control textcol"
+                                        [ngClass]="{'is-invalid': profileForm.get('city')?.invalid && profileForm.get('city')?.touched}" />
+                                </div>
+                                <div class="invalid-feedback" *ngIf="profileForm.get('city')?.hasError('required')">
+                                    City is required
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <div appCcdModeDirective>
+                                    <input type="text" id="address" formControlName="address"
+                                        class="form-control textcol"
+                                        [ngClass]="{'is-invalid': profileForm.get('address')?.invalid && profileForm.get('address')?.touched}" />
+                                </div>
+                                <div class="invalid-feedback" *ngIf="profileForm.get('address')?.hasError('required')">
+                                    Address is required
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-primary" type="submit"
+                                    [disabled]="profileForm.invalid || !profileForm.dirty">
+                                    Save
+                                </button>
+                                <button class="btn btn-danger" type="button" (click)="onCancel()"
+                                    [disabled]="!profileForm.dirty">
+                                    Cancel
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Password -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="h5 fw-semibold border-bottom pb-2 mb-4">Update Password</h3>
+                        <form [formGroup]="passwordForm" class="d-flex flex-column gap-3">
+
+                            <!-- Old Password -->
+                            <div appCcdModeDirective>
+
+                                <div class="mb-3">
+                                    <label for="oldPassword" class="form-label">Old Password</label>
+                                    <div class="input-group">
+                                        <input [type]="hide[0]() ? 'password' : 'text'" id="oldPassword"
+                                            formControlName="oldPassword" class="form-control textcol"
+                                            autocomplete="current-password" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            (click)="clickEvent(0, $event)">
+                                            <i class="fa" [ngClass]="hide[0]() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- New Password -->
+                            <div appCcdModeDirective>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <div class="input-group">
+                                        <input [type]="hide[1]() ? 'password' : 'text'" id="newPassword"
+                                            formControlName="newPassword" class="form-control textcol"
+                                            autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            (click)="clickEvent(1, $event)">
+                                            <i class="fa" [ngClass]="hide[1]() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div appCcdModeDirective>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                    <div class="input-group">
+                                        <input [type]="hide[2]() ? 'password' : 'text'" id="confirmPassword"
+                                            formControlName="confirmPassword" class="form-control textcol"
+                                            [ngClass]="{'is-invalid': passwordForm.get('confirmPassword')?.hasError('passwordMismatch')}"
+                                            autocomplete="new-password"
+                                            [attr.title]="passwordForm.get('confirmPassword')?.hasError('passwordMismatch') ? 'Passwords do not match' : ''"
+                                            [attr.data-bs-toggle]="passwordForm.get('confirmPassword')?.hasError('passwordMismatch') ? 'tooltip' : null"
+                                            [attr.data-bs-placement]="passwordForm.get('confirmPassword')?.hasError('passwordMismatch') ? 'top' : null" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            (click)="clickEvent(2, $event)">
+                                            <i class="fa" [ngClass]="hide[2]() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-flex align-items-center"
+                                        *ngIf="passwordForm.get('confirmPassword')?.hasError('passwordMismatch')"
+                                        title="Passwords do not match" data-bs-toggle="tooltip" data-bs-placement="top">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        Passwords must match
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Error message -->
+                            <div *ngIf="errorMessage()" class="text-danger">
+                                {{ errorMessage() }}
+                            </div>
+
+                            <!-- Action -->
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-success" type="button" (click)="changePassword()">
+                                    Change Password
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+</div>

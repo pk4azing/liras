@@ -1,0 +1,109 @@
+<div class="card">
+    <div class="table-responsive" appCcdModeDirective>
+        <h5 class="page-title p-2">
+            Old Activities Table
+        </h5>
+
+        <ng-container *ngIf="dataSource.data.length > 0; else noData">
+            <table mat-table [dataSource]="dataSource" multiTemplateDataRows
+                class="table table-hover table-vcenter table-striped table-custom mb-0">
+                <!-- Dynamic Column Definitions -->
+                <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+                    <th mat-header-cell *matHeaderCellDef class="text-wrap">
+                        {{getHeader(column)}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="tablerowtd align-middle textcol">
+                        <ng-container
+                            *ngIf="column !== 'action' && column !== 'startDate' && column !== 'endDate'; else dateOrDownload">
+                            {{element[column]}}
+                        </ng-container>
+
+                        <ng-template #dateOrDownload>
+                            <ng-container *ngIf="column === 'startDate'">
+                                {{element.startDate | date: 'shortDate'}}
+                            </ng-container>
+                            <ng-container *ngIf="column === 'endDate'">
+                                {{element.endDate | date: 'shortDate'}}
+                            </ng-container>
+                            <ng-container *ngIf="column === 'action'">
+                                <button mat-fab aria-label="Download button"
+                                    class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 40px;"
+                                    (click)="downloadZip(element); $event.stopPropagation()">
+                                    <mat-icon class="m-0" style="font-size: 20px;">cloud_download</mat-icon>
+                                </button>
+
+                            </ng-container>
+                        </ng-template>
+                    </td>
+                </ng-container>
+
+                <!-- Expanded Row Content -->
+                <ng-container matColumnDef="expandedDetail">
+                    <td mat-cell class="p-0 border-0" *matCellDef="let element"
+                        [attr.colspan]="displayedColumns.length">
+                        <div class="example-element-detail-wrapper"
+                            [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                            <table mat-table [dataSource]="element.files" class="mat-elevation-z8 w-full">
+                                <ng-container matColumnDef="fileName">
+                                    <th mat-header-cell *matHeaderCellDef class="childtr">File Name</th>
+                                    <td class="textcol" mat-cell *matCellDef="let file">{{file.fileName}}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="fileType">
+                                    <th mat-header-cell *matHeaderCellDef class="childtr">File Type</th>
+                                    <td class="textcol" mat-cell *matCellDef="let file">{{file.fileType}}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="uploadedDate">
+                                    <th mat-header-cell *matHeaderCellDef class="childtr">Uploaded Date</th>
+                                    <td class="textcol" mat-cell *matCellDef="let file">{{file.uploadedDate | date:
+                                        'shortDate'}}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="expiryDate">
+                                    <th mat-header-cell *matHeaderCellDef class="childtr">Expiry Date</th>
+                                    <td class="textcol" mat-cell *matCellDef="let file">{{file.expiryDate | date:
+                                        'shortDate'}}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef class="childtr">Action</th>
+                                    <td mat-cell *matCellDef="let file">
+                                        <!-- <button class="dlbtn" mat-icon-button
+                                            (click)="$event.stopPropagation(); downloadFile(file)">
+                                            <mat-icon>cloud_download</mat-icon>
+                                        </button> -->
+                                        <button mat-fab aria-label="Download button"
+                                            class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px;"
+                                            (click)="$event.stopPropagation(); downloadFile(file)">
+                                            <mat-icon class="m-0" style="font-size: 20px;">cloud_download</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['fileName', 'fileType', 'uploadedDate', 'expiryDate', 'action']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['fileName', 'fileType', 'uploadedDate', 'expiryDate', 'action']">
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Row Definitions -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let element; columns: displayedColumns"
+                    class="example-element-row cursor-pointer"
+                    [class.example-expanded-row]="expandedElement === element"
+                    (click)="expandedElement = expandedElement === element ? null : element">
+                </tr>
+                <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+            </table>
+        </ng-container>
+
+        <ng-template #noData>
+            <div class="text-center py-4 text-muted">
+                <i class="fa fa-ban me-2"></i> No activities to display.
+            </div>
+        </ng-template>
+    </div>
+</div>

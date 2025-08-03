@@ -1,0 +1,545 @@
+<!-- <div class="page-loader-wrapper">
+  <div class="loader">
+  </div>
+</div> -->
+
+<body>
+    <div #ofca [class.offcanvas-active]="isOffcanvasActive"
+        [ngClass]="['close_rightbar', selectedFont, 'theme-' + selectedTheme]"
+        class="overflow-x-hidden position-relative">
+        <div id="main_content">
+            <!-- Start Main top header -->
+            <div id="header_top" class="header_top" #headerTop>
+                <div class="container">
+                    <div class="hleft">
+                        <a class="header-brand" href="javascript:void(0)" class="text-decoration-none">
+                            <!-- <img src="/assets/images/lfras.svg" alt="Avatar" class="brand-logo" /> -->
+                            <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" version="1.0"
+                                viewBox="0 0 300.000000 300.000000" preserveAspectRatio="xMidYMid meet">
+                                <metadata>
+                                    Created by potrace 1.10, written by Peter Selinger 2001-2011
+                                </metadata>
+                                <g transform="translate(0.000000,300.000000) scale(0.100000,-0.100000)" stroke="none">
+                                    <path
+                                        d="M1089 2141 c-35 -35 -39 -82 -9 -108 11 -10 29 -26 40 -36 25 -22 29 -5 -82 -347 -48 -151 -93 -307 -99 -346 -29 -190 59 -376 213 -453 l61 -31 397 0 397 0 21 23 c21 22 22 31 22 233 0 276 22 254 -246 254 -197 0 -201 0 -222 -23 -13 -13 -22 -36 -22 -54 0 -45 36 -141 75 -199 18 -29 31 -55 28 -58 -4 -3 -78 -6 -165 -6 -118 0 -160 3 -163 13 -3 6 74 255 170 551 96 296 175 546 175 556 0 9 -10 26 -23 38 -23 21 -30 22 -281 22 l-258 0 -29 -29z m558 -23 c-11 -31 -377 -1158 -377 -1163 0 -3 117 -5 259 -5 l260 0 -60 57 c-67 64 -115 150 -128 231 l-8 52 208 0 209 0 0 -215 0 -215 -393 0 -394 0 -62 31 c-137 69 -213 244 -181 420 6 35 52 188 101 339 104 320 110 349 80 379 -11 11 -32 21 -46 21 -28 0 -29 4 -14 49 l11 31 270 0 c212 0 269 -3 265 -12z" />
+                                </g>
+                            </svg>
+
+                        </a>
+                        <div class="dropdown mt-2 align-items-baseline gap-2">
+                            <a (click)="toggleOffcanvas()" class="nav-link icon menu_toggle">
+                                <i class="fe fe-align-center"></i>
+                            </a>
+                            <a href="javascript:void(0)" (click)="toggleRightbar()" class="nav-link icon settingbar"><i
+                                    class="fe fe-settings"></i></a>
+                        </div>
+                    </div>
+                    <div class="hright align-items-baseline gap-2">
+                        <!-- <a href="javascript:void(0)" class="nav-link icon right_tab"><i
+                                class="fe fe-align-right"></i></a> -->
+                        <a [routerLink]="['/logout']" class="nav-link icon settingbar"><i class="fe fe-power"></i></a>
+                    </div>
+                </div>
+            </div>
+            <!-- Start Rightbar setting panel -->
+            <div id="rightsidebar" class="right_sidebar" [class.open]="isRightbarOpen">
+                <a (click)="toggleRightbar()" href="javascript:void(0)" class="p-3 settingbar float-right"><i
+                        class="fa fa-close"></i></a>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#Settings"
+                            aria-expanded="true">Settings</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#activity"
+                            aria-expanded="false">Activity</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane vivify fadeIn active" id="Settings" aria-expanded="true">
+                        <div class="mb-4">
+                            <h6 class="font-14 font-weight-bold text-muted curr-text">Theme Color</h6>
+                            <div class="d-flex flex-row gap-2">
+                                <!-- Theme Swatches -->
+                                <div *ngFor="let theme of themes" class="rounded position-relative"
+                                    [class.active]="selectedTheme === theme.name" (click)="selectTheme(theme)"
+                                    [style.background-color]="theme.color" [title]="theme.displayName"
+                                    style="width: 30px; height: 30px; cursor: pointer;">
+
+                                    <!-- Active State Indicator -->
+                                    <div *ngIf="selectedTheme === theme.name"
+                                        style="position: absolute; width: 20px; height: 20px; background: #fff; top: 5px; left: 5px; border-radius: 3px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="font-14 font-weight-bold mt-4 text-muted curr-text">Font Style</h6>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="font" id="fontMuli" value="font-muli"
+                                        [checked]="selectedFont === 'font-muli'" (change)="onFontChange('font-muli')">
+                                    <label class="btn w-100 py-3"
+                                        [ngClass]="{'btn-outline-secondary': selectedFont !== 'font-muli'}" [ngStyle]="selectedFont === 'font-muli' ? {
+                                    'background-color': selectedThemeColor,
+                                    'color': '#fff',
+                                    'border': '1px solid ' + selectedThemeColor
+                                  } : {}" for="fontMuli">Muli Google Font</label>
+                                </div>
+
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="font" id="fontMontserrat"
+                                        value="font-montserrat" [checked]="selectedFont === 'font-montserrat'"
+                                        (change)="onFontChange('font-montserrat')">
+                                    <label class="btn w-100 py-3"
+                                        [ngClass]="{'btn-outline-secondary': selectedFont !== 'font-montserrat'}"
+                                        [ngStyle]="selectedFont === 'font-montserrat' ? {
+                                    'background-color': selectedThemeColor,
+                                    'color': '#fff',
+                                    'border': '1px solid ' + selectedThemeColor
+                                  } : {}" for="fontMontserrat">Montserrat Google Font</label>
+                                </div>
+
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="font" id="fontPoppins"
+                                        value="font-poppins" [checked]="selectedFont === 'font-poppins'"
+                                        (change)="onFontChange('font-poppins')">
+                                    <label class="btn w-100 py-3"
+                                        [ngClass]="{'btn-outline-secondary': selectedFont !== 'font-poppins'}"
+                                        [ngStyle]="selectedFont === 'font-poppins' ? {
+                                    'background-color': selectedThemeColor,
+                                    'color': '#fff',
+                                    'border': '1px solid ' + selectedThemeColor
+                                  } : {}" for="fontPoppins">Poppins Google Font</label>
+                                </div>
+
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="font" id="fontPTSans"
+                                        value="font-ptsans" [checked]="selectedFont === 'font-ptsans'"
+                                        (change)="onFontChange('font-ptsans')">
+                                    <label class="btn w-100 py-3"
+                                        [ngClass]="{'btn-outline-secondary': selectedFont !== 'font-ptsans'}" [ngStyle]="selectedFont === 'font-ptsans' ? {
+                                    'background-color': selectedThemeColor,
+                                    'color': '#fff',
+                                    'border': '1px solid ' + selectedThemeColor
+                                  } : {}" for="fontPTSans">PT Sans Google Font</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div>
+                            <h6 class="font-14 font-weight-bold mt-4 text-muted curr-text">General Settings</h6>
+                            <ul class="setting-list list-unstyled mt-1 setting_switch">
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Night Mode</span>
+                                        <input type="checkbox" name="custom-switch-checkbox"
+                                            class="custom-switch-input btn-darkmode" [checked]="selectedMode === 'dark'"
+                                            (change)="onNightModeToggle($event)">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Fix Navbar top</span>
+                                        <input type="checkbox" [checked]="isNavbarFixed"
+                                            (change)="onNavbarFixedToggle($event)" name="custom-switch-checkbox"
+                                            class="custom-switch-input btn-fixnavbar">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Header Dark</span>
+                                        <input type="checkbox" [checked]="isHeaderDark"
+                                            (change)="onHeaderDarkToggle($event)" name="custom-switch-checkbox"
+                                            class="custom-switch-input btn-pageheader">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Min Sidebar Dark</span>
+                                        <input type="checkbox" [checked]="isMinSidebarDark"
+                                            (change)="onMinSidebarDarkToggle($event)" name="custom-switch-checkbox"
+                                            class="custom-switch-input btn-min_sidebar">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Dark Sidebar</span>
+                                        <input type="checkbox" [checked]="isSidebarDark"
+                                            (change)="onSidebarDarkToggle($event)" class="custom-switch-input">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Icon Color</span>
+                                        <input type="checkbox" [checked]="isIconColor"
+                                            (change)="onIconColorToggle($event)" class="custom-switch-input">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="custom-switch">
+                                        <span class="custom-switch-description">Gradient Color</span>
+                                        <input type="checkbox" name="custom-switch-checkbox"
+                                            class="custom-switch-input btn-gradient" [checked]="isGradientColor"
+                                            (change)="onGradientColorToggle($event)">
+                                        <span class="custom-switch-indicator"></span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                        <hr>
+                    </div>
+                    <div role="tabpanel" class="tab-pane vivify fadeIn" id="activity" aria-expanded="false">
+                        <ul class="new_timeline mt-3">
+                            <li>
+                                <div class="bullet pink"></div>
+                                <div class="time">11:00am</div>
+                                <div class="desc">
+                                    <h3>Attendance</h3>
+                                    <h4>Computer Class</h4>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="bullet pink"></div>
+                                <div class="time">11:30am</div>
+                                <div class="desc">
+                                    <h3>Added an interest</h3>
+                                    <h4>“Volunteer Activities”</h4>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="bullet green"></div>
+                                <div class="time">12:00pm</div>
+                                <div class="desc">
+                                    <h3>Developer Team</h3>
+                                    <h4>Hangouts</h4>
+                                    <ul class="list-unstyled team-info margin-0 p-t-5">
+                                        <li><img src="../assets/images/xs/avatar1.jpg" alt="Avatar"></li>
+                                        <li><img src="../assets/images/xs/avatar2.jpg" alt="Avatar"></li>
+                                        <li><img src="../assets/images/xs/avatar3.jpg" alt="Avatar"></li>
+                                        <li><img src="../assets/images/xs/avatar4.jpg" alt="Avatar"></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="bullet green"></div>
+                                <div class="time">2:00pm</div>
+                                <div class="desc">
+                                    <h3>Responded to need</h3>
+                                    <a href="javascript:void(0)">“In-Kind Opportunity”</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="bullet orange"></div>
+                                <div class="time">1:30pm</div>
+                                <div class="desc">
+                                    <h3>Lunch Break</h3>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="bullet green"></div>
+                                <div class="time">2:38pm</div>
+                                <div class="desc">
+                                    <h3>Finish</h3>
+                                    <h4>Go to Home</h4>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Start Theme panel do not add in project -->
+            <div class="theme_div" [class.open]="isThemeDivOpen">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-unstyled">
+                            <li class="list-group-item mb-2" (click)="applyMode('light')">
+                                <p>Light Version</p>
+                                <a><img src="../assets/images/themes/default.png" class="img-fluid" alt="" /></a>
+                            </li>
+                            <li class="list-group-item mb-2" (click)="applyMode('dark')">
+                                <p>Dark Version</p>
+                                <a><img src="../assets/images/themes/dark.png" class="img-fluid" alt="" /></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Start Main leftbar navigation -->
+            <div id="left-sidebar" class="sidebar">
+                <h5 class="brand-name d-flex justify-content-between align-items-center">LFRAS
+                    <a href="javascript:void(0)" class="menu_option"><i (click)="toggleSideNavItemGird()"
+                            class="icon-grid font-16 me-1" data-toggle="tooltip" data-placement="left"
+                            title="Grid & List Toggle"></i>
+                    </a>
+                </h5>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab"
+                            href="javascript:void(0)">Navigation</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="menu-uni" role="tabpanel">
+                        <nav class="sidebar-nav">
+                            <ul class="metismenu" [class.grid]="isSideNavItemGird">
+                                <li [ngClass]="{'active': router.url === '/ccd-home'}"><a [routerLink]="['/ccd-home']"
+                                        class="text-decoration-none"><i
+                                            class="fa fa-dashboard"></i><span>Dashboard</span></a></li>
+                                <li [ngClass]="{'active': router.url === '/ccd-home/ccd-activity'}"><a
+                                        [routerLink]="['/ccd-home/ccd-activity']" class="text-decoration-none"><i
+                                            class="fa fa-line-chart"></i><span>Activity</span></a></li>
+                                <li [ngClass]="{'active': router.url === '/ccd-home/ccd-settings'}"><a
+                                        [routerLink]="['/ccd-home/ccd-settings']" class="text-decoration-none"><i
+                                            class="fa fa-cogs"></i><span>Settings</span></a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="tab-pane fade" id="menu-admin" role="tabpanel">
+                        <nav class="sidebar-nav">
+                            <ul class="metismenu">
+                                <li><a href="payments.html"><i class="fa fa-credit-card"></i><span>Payments</span></a>
+                                </li>
+                                <li><a href="noticeboard.html"><i
+                                            class="fa fa-dashboard"></i><span>Noticeboard</span></a></li>
+                                <li><a href="taskboard.html"><i class="fa fa-list-ul"></i><span>Taskboard</span></a>
+                                </li>
+                                <li><a href="hostel.html"><i class="fa fa-bed"></i><span>Hostel</span></a></li>
+                                <li><a href="transport.html"><i class="fa fa-truck"></i><span>Transport</span></a></li>
+                                <li><a href="attendance.html"><i
+                                            class="fa fa-calendar-check-o"></i><span>Attendance</span></a></li>
+                                <li><a href="leave.html"><i class="fa fa-flag"></i><span>Leave</span></a></li>
+                                <li><a href="setting.html"><i class="fa fa-gear"></i><span>Settings</span></a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <!-- Start project content area -->
+            <div class="page">
+                <!-- Start Page header -->
+                <div class="section-body" id="page_top" #pageTop>
+                    <div class="container-fluid">
+                        <div class="page-header">
+                            <div class="left">
+                                @if (isOffcanvasActive) {
+                                <h5 class="brand-namemi d-flex justify-content-between align-items-center">LFRAS
+                                </h5>
+                                }
+                            </div>
+                            <div class="right">
+                                <ul class="nav nav-pills">
+                                </ul>
+                                <div class="notification d-flex">
+                                    <div class="dropdown d-flex">
+                                        <a class="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1"
+                                            (click)="toggleNotificationDropdown()"
+                                            matBadge="{{ unreadCount > 0 ? unreadCount : '' }}"
+                                            matBadgeHidden="{{ unreadCount === 0 }}" matBadgeColor="accent"
+                                            matBadgePosition="above after" aria-label="Show unread messages">
+                                            <i class="fa fa-envelope"></i>
+                                        </a>
+
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow overflow-hidden"
+                                            [class.show]="isDropdownVisible"
+                                            style="position: absolute; transform: translate3d(-312px, 32px, 0px); top: 0px; left: 0px; will-change: transform;">
+                                            <ul class="right_chat list-unstyled w350 p-0">
+                                                <li *ngFor="let notification of notifications"
+                                                    class="list-group-item p-2 border-0 position-relative"
+                                                    style="cursor: pointer;" [class.bg-light]="!notification.isRead"
+                                                    [class.animate__backOutRight]="deletingItemId === notification.id"
+                                                    [class.animate__animated]="deletingItemId === notification.id"
+                                                    (click)="!notification.isRead && markAsRead(notification)">
+                                                    <div class="d-flex align-items-start">
+                                                        <img src="../assets/images/xs/avatar1.jpg" alt="Avatar"
+                                                            class="rounded-circle me-3" width="50" height="50" />
+
+                                                        <div class="flex-grow-1">
+                                                            <!-- First row: username + timestamp -->
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-start">
+                                                                <span [ngClass]="{
+                                                                       'fw-bold text-dark': !notification.isRead,
+                                                                       'text-muted': notification.isRead
+                                                                   }">{{ notification.username }}</span>
+                                                                <small class="text-muted"
+                                                                    style="white-space: nowrap; font-size: 0.75rem">{{
+                                                                    notification.timestamp }}</small>
+                                                            </div>
+
+                                                            <!-- Message -->
+                                                            <div [ngClass]="{
+                                                                   'text-dark fw-semibold': !notification.isRead,
+                                                                   'text-muted': notification.isRead,
+                                                                   'small': true
+                                                               }">
+                                                                {{ notification.message }}
+                                                            </div>
+
+                                                            <!-- Status Badge -->
+                                                            <span class="badge rounded-pill mt-1" [ngClass]="{
+                                                                   'border border-success': notification.messageType === 'created',
+                                                                   'border border-danger': notification.messageType === 'closed'
+                                                               }" style="width: 10px; height: 10px;"></span>
+                                                        </div>
+
+                                                        <!-- Delete Button -->
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-link text-danger ms-2 mt-1"
+                                                            (click)="onDeleteNotification(notification.id); $event.stopPropagation()"
+                                                            [disabled]="deletingItemId === notification.id"
+                                                            style="font-size: 1rem;">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            </ul>
+
+                                            <div class="dropdown-divider"></div>
+
+                                            <!-- Clear all notifications -->
+                                            <a href="javascript:void(0)"
+                                                class="dropdown-item text-center text-muted-dark readall"
+                                                (click)="clearAllNotifications($event)" [class.disabled]="clearingAll">
+                                                Clear all notifications
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown d-flex" ngbDropdown>
+                                        <a class="chip ms-3 d-flex align-items-center" ngbDropdownToggle>
+                                            <img src="/assets/images/xs/avatar5.jpg" alt="Avatar" class="avatar me-2" />
+                                            {{ loggedInUsername }}
+                                            <i class="bi bi-chevron-down dropdown-arrow"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+                                            <a class="dropdown-item" [routerLink]="['/ccd-home/ccd-settings']">
+                                                <i class="dropdown-icon bi bi-gear me-2"></i> Settings
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" [routerLink]="['/ccd-home/ccd-help']">
+                                                <i class="dropdown-icon bi bi-question-circle me-2"></i> Need help?
+                                            </a>
+                                            <a class="dropdown-item" [routerLink]="['/logout']">
+                                                <i class="dropdown-icon bi bi-box-arrow-right me-2"></i> Sign out
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Start Page title and tab -->
+                @if (isDashboardRoute) {
+                <div class="section-body">
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="header-action">
+                                <h1 class="page-title">{{homeTitle}}</h1>
+                            </div>
+                            <ul class="nav nav-tabs page-header-tab">
+                                <li class="nav-item"><a class="nav-link active" data-toggle="tab">Dashboard</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body mt-4">
+                    <div class="container-fluid">
+                        <div class="card p-4">
+                            <h5 class="card-title">Last Activity</h5>
+
+                            <!-- Check if there are any activity cards -->
+                            <div *ngIf="activityCards.length > 0; else noActivity">
+                                <div class="row">
+                                    <div *ngFor="let card of activityCards" class="col-lg-4 col-md-6 mb-4">
+                                        <div class="card">
+                                            <div class="card-body top_counter">
+                                                <div class="icon" [ngClass]="card.colorClass">
+                                                    <i class="fa" [ngClass]="card.icon"></i>
+                                                </div>
+                                                <div class="content">
+                                                    <span>{{ card.label }}</span>
+                                                    <h5 class="number mb-0 font600">{{ card.value }}</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Template shown if no data -->
+                            <ng-template #noActivity>
+                                <div class="text-center text-muted">
+                                    <i class="fa fa-info-circle fa-2x"></i>
+                                    <h6>No activity found.</h6>
+                                    <p class="small">Once an activity starts, it will appear here.</p>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="section-body mt-4">
+                    <div class="container-fluid">
+                        <div class="row clearfix row-deck">
+                            <div class="col-lg-4 col-md-12">
+                                <!-- events-list.component.html -->
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h3 class="card-title">Events List</h3>
+                                        <div id="event-list" class="fc event_list">
+                                            <div *ngFor="let event of events" class="fc-event {{event.className}}"
+                                                [attr.data-class]="event.className">
+                                                {{event.title}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="fc fc-unthemed fc-ltr calendar">
+                                            <full-calendar class="calendar" [options]="calendarOptions"></full-calendar>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+                @else {
+                <div class="section-body">
+                    <router-outlet></router-outlet>
+                </div>
+                }
+
+                <!-- Start main footer -->
+                <div class="section-body">
+                    <footer class="footer">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12">
+                                    Copyright © 2024 <a
+                                        href="https://themeforest.net/user/puffintheme/portfolio">PuffinTheme</a>.
+                                </div>
+                                <div class="col-md-6 col-sm-12 text-md-right">
+                                    <ul class="list-inline mb-0">
+                                        <li class="list-inline-item"><a href="../doc/index.html">Documentation</a>
+                                        </li>
+                                        <li class="list-inline-item"><a href="javascript:void(0)">FAQ</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

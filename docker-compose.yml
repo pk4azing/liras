@@ -1,33 +1,45 @@
-version: "3.9"
+version: '3.9'
 
 services:
-  web:
+  backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: docker/Dockerfile
-    container_name: lfras_phone_web
-    command: python manage.py runserver 0.0.0.0:2225
+    container_name: lfras_backend
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
-      - "2225:2225"
-    env_file:
-      - .env
+      - "2225:2225"  # Host:2225 → Container:2225
     depends_on:
       - db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/lfras_db
+      - DJANGO_SETTINGS_MODULE=lfras_backend.settings
+    command: gunicorn lfras_backend.wsgi:application --bind 0.0.0.0:2225
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lfras_frontend
+    ports:
+      - "3766:3766"  # Host:3766 → Container:3766
+    depends_on:
+      - backend
+    command: >
+      sh -c "npm install && npm run build && npx http-server dist -p 3766"
 
   db:
-    image: postgres:14
-    container_name: lfras_phone_db
-    restart: always
+    image: postgres:13
+    container_name: lfras_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     environment:
       POSTGRES_DB: lfras_db
-      POSTGRES_USER: lfras_user
+      POSTGRES_USER:
       POSTGRES_PASSWORD: Xunil@999
     ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "5432:5432"
 
 volumes:
   postgres_data:

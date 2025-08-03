@@ -1,0 +1,31 @@
+<div class="card mb-0">
+    <h2 mat-dialog-title class="h5 fw-semibold text-black border-bottom pb-2">Edit Ticket</h2>
+  
+    <mat-dialog-content class="p-4 overflow-auto overflow-x-hidden" [formGroup]="editForm">
+      <!-- Description -->
+      <div class="mb-3">
+        <label class="mb-1 fw-medium text-black">Description</label>
+        <input type="text" formControlName="description" class="form-control"
+          [ngClass]="{ 'is-invalid': editForm.get('description')?.invalid && editForm.get('description')?.touched }" />
+        <div class="invalid-feedback" *ngIf="editForm.get('description')?.hasError('required')">
+          Description is required
+        </div>
+      </div>
+  
+      <!-- Detailed Description -->
+      <div class="mb-3">
+        <label class="mb-1 fw-medium text-black">Detailed Description</label>
+        <textarea formControlName="detailedDescription" rows="4" class="form-control"
+          [ngClass]="{ 'is-invalid': editForm.get('detailedDescription')?.invalid && editForm.get('detailedDescription')?.touched }"></textarea>
+        <div class="invalid-feedback" *ngIf="editForm.get('detailedDescription')?.hasError('required')">
+          Detailed description is required
+        </div>
+      </div>
+    </mat-dialog-content>
+  
+    <mat-dialog-actions align="end" class="p-3 pt-0 d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="onSave()" [disabled]="editForm.invalid">Save</button>
+    </mat-dialog-actions>
+  </div>
+  

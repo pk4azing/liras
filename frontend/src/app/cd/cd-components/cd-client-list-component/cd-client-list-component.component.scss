@@ -1,0 +1,41 @@
+// .mat-expansion-panel {
+//     background-color: #fff !important;
+// }
+
+// .expanel {
+//     background-color: #fff !important;
+// }
+
+.light-div {
+    .expanel {
+        background-color: #faf9fd;
+    }
+
+    p {
+        color: #434a54;
+    }
+
+    span {
+        color: #434a54 !important;
+    }
+
+    label {
+        color: #434a54 !important;
+    }
+
+    .mat-mdc-tab.mdc-tab--active {
+        .mdc-tab__text-label {
+            color: black !important;
+            font-weight: bold;
+        }
+    }
+}
+
+.dark-div {
+    .form-control {
+
+        color: #fff !important;
+    }
+
+}
+

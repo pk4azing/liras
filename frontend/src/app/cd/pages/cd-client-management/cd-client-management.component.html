@@ -1,0 +1,25 @@
+<div class="section-body">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center" >
+            <div class="header-action">
+                <h1 class="page-title">{{homeTitle}}</h1>
+            </div>
+            <ul class="nav nav-tabs page-header-tab">
+                <li class="nav-item"><a class="nav-link active" data-toggle="tab">{{homeTitle}}</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="section-body mt-4">
+    <h4 class="fw-semibold border-bottom border-2 pb-2 mb-4">Client List</h4>    
+    <div class="d-flex justify-content-end mb-1">
+        <button type="button" class="btn btn-primary m-2" (click)="openAddUserDialog()">
+            Create
+        </button>
+    </div>
+    <div appCdModeDirective>
+        <app-cd-client-list-component />
+    </div>
+</div>
+

@@ -1,0 +1,25 @@
+<div class="section-body">
+    <div class="container-fluid" appCdModeDirective>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="header-action">
+                <h1 class="page-title">{{homeTitle}}</h1>
+            </div>
+            <ul class="nav nav-tabs page-header-tab">
+                <li class="nav-item"><a class="nav-link active" data-toggle="tab">{{homeTitle}}</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="section-body mt-4">
+    <div class="d-flex justify-content-end p-3 rounded-lg">
+        <button type="button" class="btn btn-primary m-2" (click)="onCreateClick()">
+            Create
+        </button>
+    </div>
+</div>
+
+<div class="section-body mt-4">
+    <div>
+        <app-cd-user-management-table #userTable></app-cd-user-management-table>
+    </div>
+</div>

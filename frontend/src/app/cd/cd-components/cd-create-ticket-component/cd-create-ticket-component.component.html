@@ -1,0 +1,29 @@
+<div class="card mb-0">
+    <h2 mat-dialog-title class="h5 fw-semibold text-black border-bottom pb-2">Create Ticket</h2>
+    <mat-dialog-content class="p-4 overflow-auto overflow-x-hidden" [formGroup]="ticketForm">
+        <!-- Title -->
+        <div class="mb-3">
+            <label class="mb-1 fw-medium text-black">Ticket Title</label>
+            <input type="text" formControlName="title" class="form-control"
+                [ngClass]="{ 'is-invalid': ticketForm.get('title')?.invalid && ticketForm.get('title')?.touched }" />
+            <div class="invalid-feedback" *ngIf="ticketForm.get('title')?.hasError('required')">
+                Title is required
+            </div>
+        </div>
+        <!-- Description -->
+        <div class="mb-3">
+            <label class="mb-1 fw-medium text-black">Description</label>
+            <textarea formControlName="description" rows="3" class="form-control"
+                [ngClass]="{ 'is-invalid': ticketForm.get('description')?.invalid && ticketForm.get('description')?.touched }"></textarea>
+            <div class="invalid-feedback" *ngIf="ticketForm.get('description')?.hasError('required')">
+                Description is required
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end" class="p-3 pt-0 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="onSubmit()"
+            [disabled]="ticketForm.invalid">Create</button>
+    </mat-dialog-actions>
+
+</div>
