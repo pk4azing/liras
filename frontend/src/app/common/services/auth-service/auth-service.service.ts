@@ -7,7 +7,7 @@ import { UserCredentials, LoggedInUser } from './auth';
   providedIn: 'root',
 })
 export class AuthServiceService {
-  private readonly loginUrl = 'http://127.0.0.1:2225/api-user-login/';
+  private readonly loginUrl = 'http://127.0.0.1:2225/api/accounts/login/';
 
   constructor(private http: HttpClient) {}
 
