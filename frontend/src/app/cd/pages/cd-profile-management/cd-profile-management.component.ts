@@ -108,6 +108,7 @@ export class CdProfileManagementComponent {
 
   ngOnInit(): void {
     // User profile form logic
+    this.profileService.fetchUserProfileFromBackend();
     this.originalData = this.profileService.getUserProfile();
     const user = this.originalData;
 

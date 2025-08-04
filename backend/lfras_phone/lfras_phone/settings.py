@@ -116,6 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "https://d1227fbd8df2.ngrok-free.app"
 ]
 
 # Internationalization

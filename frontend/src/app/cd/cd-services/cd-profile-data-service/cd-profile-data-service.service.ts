@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 export interface UserProfile {
   name: string;
@@ -22,9 +23,13 @@ export interface SmtpConfig {
   providedIn: 'root',
 })
 export class CdProfileDataServiceService {
-  private userProfileSubject = new BehaviorSubject<UserProfile>(
-    this.loadInitialProfile()
-  );
+  private userProfileSubject = new BehaviorSubject<UserProfile>({
+    name: '',
+    phone: '',
+    email: '',
+    city: '',
+    address: '',
+  });
 
   private smtp: SmtpConfig | null = {
     host: 'smtp.example.com',
@@ -38,6 +43,10 @@ export class CdProfileDataServiceService {
   userProfile$ = this.userProfileSubject.asObservable();
   private smtpConfigSubject = new BehaviorSubject<SmtpConfig | null>(this.smtp);
 
+  constructor(private http: HttpClient) {
+    this.fetchUserProfileFromBackend();
+  }
+
   getSmtpConfig(): Observable<SmtpConfig | null> {
     return this.smtpConfigSubject.asObservable();
   }
@@ -47,40 +56,46 @@ export class CdProfileDataServiceService {
     this.smtpConfigSubject.next(config);
   }
 
-  /** Load initial profile from localStorage or fallback to dummy */
-  private loadInitialProfile(): UserProfile {
-    const localUser = localStorage.getItem('user');
+  @Injectable({
+    providedIn: 'root',
+  })
 
-    if (localUser) {
-      try {
-        const user = JSON.parse(localUser);
-        return {
-          name: user.username || 'John Doe',
-          phone: this.formatPhone(user.phone),
-          email: user.email || 'john.doe@example.com',
-          city: 'Hyderabad',
-          address: 'Plot 45, Jubilee Hills',
-        };
-      } catch (e) {
-        console.error('Invalid local user JSON', e);
-      }
-    }
+  public fetchUserProfileFromBackend(): void {
+    const token = this.getToken();
+    if (!token) return;
 
-    // Fallback dummy data
-    return {
-      name: 'John Doe',
-      phone: '+11234567890',
-      email: 'john.doe@example.com',
-      city: 'Hyderabad',
-      address: 'Plot 45, Jubilee Hills',
-    };
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    this.http
+      .get<any>('http://localhost:2225/api/accounts/profile/', { headers })
+      .subscribe({
+        next: (data) => {
+          console.log('Profile Response from Backend:', data);
+          console.log('Local Stored data:', localStorage.getItem('user'));
+          this.userProfileSubject.next({
+            name: data.name,
+            phone: this.formatPhone(data.phone),
+            email: data.email,
+            city: data.city || '',
+            address: data.address || '',
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load user profile:', err);
+        },
+      });
+  }
+
+  /** Get token from localStorage */
+  private getToken(): string {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user).token : '';
   }
 
   /** Formats phone number to E.164 */
   private formatPhone(phone: string): string {
     if (!phone) return '';
-    // Assume default US country code if not present
-    return phone.startsWith('+') ? phone : `+1${phone}`;
+    return phone.startsWith('+') ? phone : `+91${phone}`; // Assuming India
   }
 
   getUserProfile(): UserProfile {
@@ -96,17 +111,12 @@ export class CdProfileDataServiceService {
   }
 
   private extractPhoneString(phone: any): string {
-    // If phone is a string, return it directly
     if (typeof phone === 'string') {
       return this.formatPhone(phone);
     }
-
-    // If phone is an object from ngx-intl-tel-input, use e164Number
     if (typeof phone === 'object' && phone.e164Number) {
       return phone.e164Number;
     }
-
-    // Fallback
     return '';
   }
 }

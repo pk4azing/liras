@@ -35,4 +35,7 @@ class ProfileView(APIView):
             "username": user.username,
             "email": user.email,
             "phone": user.phone,
+            "Name": user.full_name,
+            "City": user.city,
+            "Address": user.address,
         }, status=status.HTTP_200_OK)
