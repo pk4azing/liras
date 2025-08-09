@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 
 export interface UserProfile {
   name: string;
@@ -23,6 +23,7 @@ export interface SmtpConfig {
   providedIn: 'root',
 })
 export class CdProfileDataServiceService {
+  private readonly API_URL = 'http://127.0.0.1:2225/api';
   private userProfileSubject = new BehaviorSubject<UserProfile>({
     name: '',
     phone: '',
@@ -56,46 +57,61 @@ export class CdProfileDataServiceService {
     this.smtpConfigSubject.next(config);
   }
 
-  @Injectable({
-    providedIn: 'root',
-  })
-
   public fetchUserProfileFromBackend(): void {
     const token = this.getToken();
-    if (!token) return;
+    if (!token) {
+      console.error('No token available');
+      return;
+    }
 
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    console.log('Making request with token:', token);
+    console.log('Full headers:', headers.keys().map((key: string) => `${key}: ${headers.get(key)}`));
 
     this.http
-      .get<any>('http://localhost:2225/api/accounts/profile/', { headers })
+      .get<UserProfile>(`${this.API_URL}/accounts/profile/`, {
+        headers,
+        observe: 'response'
+      })
       .subscribe({
-        next: (data) => {
-          console.log('Profile Response from Backend:', data);
-          console.log('Local Stored data:', localStorage.getItem('user'));
-          this.userProfileSubject.next({
-            name: data.name,
-            phone: this.formatPhone(data.phone),
-            email: data.email,
-            city: data.city || '',
-            address: data.address || '',
-          });
+        next: (response: HttpResponse<UserProfile>) => {
+          console.log('Success Response:', response);
+          if (response.body) {
+            const data = response.body;
+            this.userProfileSubject.next({
+              name: data.name,
+              phone: this.formatPhone(data.phone),
+              email: data.email,
+              city: data.city || '',
+              address: data.address || '',
+            });
+          }
         },
-        error: (err) => {
-          console.error('Failed to load user profile:', err);
+        error: (error: any) => {
+          console.error('Error Response:', {
+            status: error.status,
+            message: error.message,
+            error: error.error,
+            headers: error.headers?.keys().map((key: string) =>
+              `${key}: ${error.headers?.get(key)}`
+            ),
+          });
         },
       });
   }
 
-  /** Get token from localStorage */
   private getToken(): string {
     const user = localStorage.getItem('user');
+    console.log('Retrieved user from localStorage:', user);
     return user ? JSON.parse(user).token : '';
   }
 
-  /** Formats phone number to E.164 */
   private formatPhone(phone: string): string {
     if (!phone) return '';
-    return phone.startsWith('+') ? phone : `+91${phone}`; // Assuming India
+    return phone.startsWith('+') ? phone : `+91${phone}`;
   }
 
   getUserProfile(): UserProfile {
@@ -110,12 +126,12 @@ export class CdProfileDataServiceService {
     });
   }
 
-  private extractPhoneString(phone: any): string {
+  private extractPhoneString(phone: unknown): string {
     if (typeof phone === 'string') {
       return this.formatPhone(phone);
     }
-    if (typeof phone === 'object' && phone.e164Number) {
-      return phone.e164Number;
+    if (phone && typeof phone === 'object' && 'e164Number' in phone) {
+      return phone.e164Number as string;
     }
     return '';
   }

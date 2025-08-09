@@ -115,8 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",
-    "https://d1227fbd8df2.ngrok-free.app"
+    "http://localhost:4200"
 ]
 
 # Internationalization
@@ -145,6 +144,7 @@ AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default=None, cast=str)
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default=None, cast=str)
 AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME", default=None, cast=str)
 AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default=None, cast=str)
+AWS_S3_PREFIX = ""
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
