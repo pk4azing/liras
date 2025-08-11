@@ -1,13 +1,15 @@
+import sys
 from pathlib import Path
 from decouple import config
 from django.conf.global_settings import SECRET_KEY
 from datetime import timedelta
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+sys.path.append(str(BASE_DIR / 'lfras_phone'))
 DEBUG = True#config('DEBUG', default=False, cast=bool)
 
 SECRET_KEY = config('SECRET_KEY', default=SECRET_KEY, cast=str)
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 #SECRET_KEY = "django-insecure-k-kt$bvy=_vs2uu1gl$*^irt1y&50=a$3w%r16-5-ky8_au*&k"
 
@@ -38,7 +40,6 @@ INSTALLED_APPS = [
     'employees',
     'reports',
     'tickets',
-    'downloads',
     'notifications',
 ]
 
@@ -129,14 +130,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = "static/"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -159,3 +153,24 @@ SIMPLE_JWT = {
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
 }
+
+
+# Redis broker
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"  # or UTC
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "reports-run-due-schedules-every-5min": {
+        "task": "reports.tasks.run_due_schedules",
+        "schedule": crontab(minute="*/5"),
+    },
+}
+
+

@@ -2,29 +2,29 @@ from django.urls import path
 
 from .views import (
     LoginView,
-    TokenRefresh,
     LogoutView,
     ProfileView,
     PasswordCheckView,
-    PasswordUpdateView,
+    PasswordChangeView,
     PasswordResetRequestView,
+    PasswordResetConfirmView,
     SMTPConfigView,
 )
 
 urlpatterns = [
-    # Auth
-    path("login/", LoginView.as_view(), name="login"),
-    path("token/refresh/", TokenRefresh.as_view(), name="token_refresh"),
-    path("logout/", LogoutView.as_view(), name="logout"),
+    # auth
+    path("login/", LoginView.as_view(), name="accounts-login"),
+    path("logout/", LogoutView.as_view(), name="accounts-logout"),
 
-    # Profile
-    path("profile/", ProfileView.as_view(), name="profile"),
+    # profile
+    path("profile/", ProfileView.as_view(), name="accounts-profile"),
 
-    # Password
-    path("password/check/", PasswordCheckView.as_view(), name="password_check"),
-    path("password/update/", PasswordUpdateView.as_view(), name="password_update"),
-    path("password/reset-request/", PasswordResetRequestView.as_view(), name="password_reset_request"),
+    # password flows
+    path("password/check/", PasswordCheckView.as_view(), name="accounts-password-check"),
+    path("password/change/", PasswordChangeView.as_view(), name="accounts-password-change"),
+    path("password/reset/", PasswordResetRequestView.as_view(), name="accounts-password-reset-request"),
+    path("password/reset/confirm/", PasswordResetConfirmView.as_view(), name="accounts-password-reset-confirm"),
 
-    # SMTP (no serializer)
-    path("<int:client_id>/smtp/", SMTPConfigView.as_view(), name="smtp_config"),
+    # smtp config
+    path("smtp/", SMTPConfigView.as_view(), name="accounts-smtp-config"),
 ]

@@ -1,165 +1,133 @@
 from __future__ import annotations
 
 import json
-from typing import Optional
+import os
+import uuid
+from typing import Any, Optional
 
 import boto3
 from botocore.exceptions import ClientError
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage, get_connection
-from django.db import transaction
-from django.utils.crypto import get_random_string
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from rest_framework import permissions, status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
     UserProfileSerializer,
+    CheckPasswordSerializer,
+    UpdatePasswordSerializer,
     PasswordResetRequestSerializer,
-    CustomTokenObtainPairSerializer,  # your existing JWT login serializer
+    PasswordResetConfirmSerializer,
+    CustomTokenObtainPairSerializer,   # you already have this in serializers.py
 )
 
 User = get_user_model()
 
-# ---------------------------
-# Helpers: S3 + SMTP sending
-# ---------------------------
-
-def _s3():
+# -----------------------------------------------------------------------------
+# S3 utilities (read/write smtp.json under the user's client folder)
+# -----------------------------------------------------------------------------
+def _get_s3_client():
+    # Creds & region must be set in settings.py
     return boto3.client(
         "s3",
         region_name=getattr(settings, "AWS_S3_REGION_NAME", None),
         aws_access_key_id=getattr(settings, "AWS_ACCESS_KEY_ID", None),
         aws_secret_access_key=getattr(settings, "AWS_SECRET_ACCESS_KEY", None),
+        aws_session_token=getattr(settings, "AWS_SESSION_TOKEN", None),
     )
 
-S3_BUCKET = getattr(settings, "AWS_S3_BUCKET_NAME", None)
-ROOT_PREFIX = "LD_Clients"
+def _smtp_s3_key(client_id: str | int) -> str:
+    # We store SMTP config per client at LD_Clients/{client_id}/Configs/smtp.json
+    return f"LD_Clients/{client_id}/Configs/smtp.json"
 
-def _smtp_key(client_id: int) -> str:
-    return f"{ROOT_PREFIX}/{client_id}/Configs/smtp.json"
+def load_smtp_from_s3(client_id: str | int) -> Optional[dict]:
+    bucket = getattr(settings, "AWS_STORAGE_BUCKET_NAME", None)
+    if not bucket:
+        raise RuntimeError("AWS_STORAGE_BUCKET_NAME is not configured in settings.")
 
-def _get_json(bucket: str, key: str) -> Optional[dict]:
+    s3 = _get_s3_client()
+    key = _smtp_s3_key(client_id)
+
     try:
-        obj = _s3().get_object(Bucket=bucket, Key=key)
-        return json.loads(obj["Body"].read().decode("utf-8"))
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        body = obj["Body"].read().decode("utf-8")
+        return json.loads(body)
     except ClientError as e:
-        code = e.response.get("Error", {}).get("Code")
-        if code in {"NoSuchKey", "404"}:
+        # Not found is fine; return None
+        code = e.response.get("Error", {}).get("Code", "")
+        if code in ("NoSuchKey", "404"):
             return None
         raise
+    except Exception:
+        raise
 
-def _put_json(bucket: str, key: str, data: dict) -> None:
-    _s3().put_object(
+def save_smtp_to_s3(client_id: str | int, data: dict) -> None:
+    bucket = getattr(settings, "AWS_STORAGE_BUCKET_NAME", None)
+    if not bucket:
+        raise RuntimeError("AWS_STORAGE_BUCKET_NAME is not configured in settings.")
+
+    s3 = _get_s3_client()
+    key = _smtp_s3_key(client_id)
+    body = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+    s3.put_object(
         Bucket=bucket,
         Key=key,
-        Body=json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8"),
+        Body=body.encode("utf-8"),
         ContentType="application/json",
     )
 
-def _send_email_with_client_smtp(
-    *,
-    client_id: Optional[int],
-    subject: str,
-    body: str,
-    to_email: str,
-    fallback_to_default: bool = True,
-) -> None:
-    """
-    Try to send via client SMTP (S3-stored). If not configured and fallback is True,
-    use Django's default EMAIL_* settings.
-    """
-    connection = None
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
-
-    if client_id and S3_BUCKET:
-        cfg = _get_json(S3_BUCKET, _smtp_key(client_id))
-        if cfg:
-            # expected fields in cfg (we validate min shape in the PUT view)
-            host = cfg.get("host")
-            port = cfg.get("port")
-            username = cfg.get("username")
-            password = cfg.get("password")
-            use_tls = not cfg.get("secure", False)  # if secure=True, assume SSL; else TLS
-            use_ssl = cfg.get("secure", False)
-            from_email = cfg.get("senderEmail") or from_email
-
-            connection = get_connection(
-                backend="django.core.mail.backends.smtp.EmailBackend",
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                use_tls=use_tls if not use_ssl else False,
-                use_ssl=use_ssl,
-                timeout=30,
-            )
-
-    if connection is None and fallback_to_default:
-        connection = get_connection()
-
-    if connection is None:
-        # No way to send email; fail silently by design (log if you want)
-        return
-
-    EmailMessage(
-        subject=subject,
-        body=body,
-        from_email=from_email,
-        to=[to_email],
-        connection=connection,
-    ).send(fail_silently=True)
-
-
-# ---------------------------
-# Auth: Login / Refresh / Logout
-# ---------------------------
-
+# -----------------------------------------------------------------------------
+# Auth (login / logout w/ blacklist)
+# -----------------------------------------------------------------------------
 class LoginView(TokenObtainPairView):
     """
-    POST: {email/username, password} -> returns access/refresh + your extra fields
+    Uses your CustomTokenObtainPairSerializer.
+    If your serializer is configured to return only `access` + user details,
+    that’s exactly what this endpoint will return.
     """
     serializer_class = CustomTokenObtainPairSerializer
 
 
-class TokenRefresh(TokenRefreshView):
-    pass
-
-
 class LogoutView(APIView):
     """
-    POST: optionally accept a 'refresh' token and blacklist it.
-    Frontend already clears local storage; this just adds server-side revocation if provided.
+    Blacklist refresh token on logout.
+    Request body must include: {"refresh": "<refresh_token>"}.
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        refresh = request.data.get("refresh")
-        if refresh:
-            try:
-                token = RefreshToken(refresh)
-                token.blacklist()  # requires simplejwt blacklist app enabled
-            except Exception:
-                # ignore; still log out client-side
-                pass
-        return Response({"detail": "Logged out."}, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            raise ValidationError({"detail": "Refresh token is required to logout."})
 
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception:
+            raise ValidationError({"detail": "Invalid or expired refresh token."})
 
-# ---------------------------
-# Profile (CRUD-like)
-# ---------------------------
+        return Response({"ok": True}, status=status.HTTP_200_OK)
 
+# -----------------------------------------------------------------------------
+# Profile CRUD
+# -----------------------------------------------------------------------------
 class ProfileView(APIView):
     """
-    GET    -> return current user's profile
-    PATCH  -> partial update profile (name/phone/city/address/email)
-    DELETE -> delete the user account (hard delete)
+    GET:    Return own profile
+    POST:   Initialize/overwrite profile fields (idempotent for existing users)
+    PATCH:  Partial update
+    DELETE: Soft-delete (deactivate) the user
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -168,210 +136,130 @@ class ProfileView(APIView):
         data = {
             "id": user.id,
             "username": getattr(user, "username", "") or "",
-            "email": getattr(user, "email", "") or "",
-            "name": getattr(user, "full_name", "") or "",
+            "email": user.email,
             "phone": getattr(user, "phone", "") or "",
+            "name": getattr(user, "full_name", "") or "",
             "city": getattr(user, "city", "") or "",
             "address": getattr(user, "address", "") or "",
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    @transaction.atomic
-    def patch(self, request):
-        user: User = request.user
-        serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
+    def post(self, request):
+        """
+        Upsert-style create/update for the current user's profile fields.
+        """
+        serializer = UserProfileSerializer(instance=request.user, data=request.data, partial=False, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        updated_user = serializer.save()
+        serializer.save()
+        return Response(serializer.to_representation(request.user), status=status.HTTP_200_OK)
 
-        # Notify via email using client-supplied SMTP if available
-        client_id = request.data.get("client_id") or request.headers.get("X-Client-ID")
-        try:
-            client_id = int(client_id) if client_id is not None else None
-        except (TypeError, ValueError):
-            client_id = None
+    def patch(self, request):
+        serializer = UserProfileSerializer(instance=request.user, data=request.data, partial=True, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.to_representation(request.user), status=status.HTTP_200_OK)
 
-        if updated_user.email:
-            _send_email_with_client_smtp(
-                client_id=client_id,
-                subject="Your profile was updated",
-                body="Hi,\n\nYour account profile was recently updated. If this wasn't you, please contact support.\n",
-                to_email=updated_user.email,
-            )
-
-        return Response(UserProfileSerializer(updated_user).data, status=status.HTTP_200_OK)
-
-    @transaction.atomic
     def delete(self, request):
+        """
+        Soft delete: deactivate user.
+        """
         user: User = request.user
-        email = getattr(user, "email", None)
-
-        user.delete()
-
-        # Best-effort notify
-        client_id = request.headers.get("X-Client-ID")
-        try:
-            client_id = int(client_id) if client_id is not None else None
-        except (TypeError, ValueError):
-            client_id = None
-
-        if email:
-            _send_email_with_client_smtp(
-                client_id=client_id,
-                subject="Your account was deleted",
-                body="Hi,\n\nThis is a confirmation that your account has been deleted.\n",
-                to_email=email,
-            )
+        user.is_active = False
+        user.save(update_fields=["is_active"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-# ---------------------------
-# Password: check / update / reset-request
-# ---------------------------
-
+# -----------------------------------------------------------------------------
+# Password flows
+# -----------------------------------------------------------------------------
 class PasswordCheckView(APIView):
     """
-    POST: {password} -> {valid: true/false}
+    POST: { "password": "..." } -> { "valid": true/false }
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        raw = request.data.get("password", "")
-        valid = bool(raw) and request.user.check_password(raw)
-        return Response({"valid": valid}, status=status.HTTP_200_OK)
+        serializer = CheckPasswordSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        return Response({"valid": serializer.validated_data["valid"]}, status=status.HTTP_200_OK)
 
 
-class PasswordUpdateView(APIView):
+class PasswordChangeView(APIView):
     """
-    POST: {current_password, new_password}
+    POST: { "current_password": "...", "new_password": "..." }
+    - Changes password and (optionally) emails the user via client SMTP (serializer handles email).
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    @transaction.atomic
     def post(self, request):
-        current_password = request.data.get("current_password")
-        new_password = request.data.get("new_password")
-
-        if not current_password or not new_password:
-            return Response(
-                {"detail": "current_password and new_password are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if not request.user.check_password(current_password):
-            return Response({"detail": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # (Optional) add your own password policy checks here
-        if len(new_password) < 8:
-            return Response({"detail": "New password must be at least 8 characters."}, status=400)
-
-        request.user.set_password(new_password)
-        request.user.save(update_fields=["password"])
-
-        # notify
-        client_id = request.data.get("client_id") or request.headers.get("X-Client-ID")
-        try:
-            client_id = int(client_id) if client_id is not None else None
-        except (TypeError, ValueError):
-            client_id = None
-
-        if request.user.email:
-            _send_email_with_client_smtp(
-                client_id=client_id,
-                subject="Your password was changed",
-                body="Hi,\n\nYour account password was just changed. If this wasn't you, reset it immediately.\n",
-                to_email=request.user.email,
-            )
-
-        return Response({"detail": "Password updated."}, status=status.HTTP_200_OK)
+        serializer = UpdatePasswordSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()  # serializer handles set_password + email
+        return Response({"ok": True}, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(APIView):
     """
-    POST: {email}
-    Sends a reset notice (or link/code if you wire one up) to the email if it exists.
+    POST: { "email": "..." }
+    Generates a reset token and emails user a reset link using client SMTP.
+    The email content and sending is handled by the serializer (using SMTP from S3).
     """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer = PasswordResetRequestSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
-
-        try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            # Don't leak emails
-            return Response({"detail": "If that account exists, a reset email has been sent."}, status=200)
-
-        # generate a simple one-time code token (you can swap this for your real flow)
-        reset_code = get_random_string(8).upper()
-
-        # save code somewhere persistent if you need verification later (cache/db) — omitted here
-
-        # try using client SMTP if header provided
-        client_id = request.headers.get("X-Client-ID")
-        try:
-            client_id = int(client_id) if client_id is not None else None
-        except (TypeError, ValueError):
-            client_id = None
-
-        _send_email_with_client_smtp(
-            client_id=client_id,
-            subject="Password reset request",
-            body=(
-                "Hi,\n\nWe received a request to reset your password.\n"
-                f"Reset code: {reset_code}\n\n"
-                "If you did not request this, you can ignore this email."
-            ),
-            to_email=email,
-        )
-
-        return Response({"detail": "If that account exists, a reset email has been sent."}, status=status.HTTP_200_OK)
+        serializer.save()  # serializer generates token & sends email
+        return Response({"ok": True}, status=status.HTTP_200_OK)
 
 
-# ---------------------------
-# SMTP Config (no serializer)
-# ---------------------------
+class PasswordResetConfirmView(APIView):
+    """
+    POST: { "uidb64": "...", "token": "...", "new_password": "..." }
+    Confirms reset and sets new password (serializer sets password + optional email).
+    """
+    permission_classes = [permissions.AllowAny]
 
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"ok": True}, status=status.HTTP_200_OK)
+
+# -----------------------------------------------------------------------------
+# SMTP config (per client) stored in S3 as JSON
+# -----------------------------------------------------------------------------
 class SMTPConfigView(APIView):
     """
-    GET /api/accounts/{client_id}/smtp/ -> read JSON from S3
-    PUT /api/accounts/{client_id}/smtp/ -> write JSON to S3
-    No serializer is used; we validate a minimal shape inline.
+    GET:  returns SMTP JSON stored at LD_Clients/{client_id}/Configs/smtp.json
+    PUT:  accepts JSON body and writes it to the same path
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, client_id: int, *args, **kwargs):
-        if not S3_BUCKET:
-            return Response({"detail": "S3 bucket not configured."}, status=500)
+    def get_client_id_or_403(self, request) -> str | int:
+        client_id = getattr(request.user, "client_id", None)
+        if not client_id:
+            raise PermissionDenied("User is not linked to a client_id.")
+        return client_id
 
-        data = _get_json(S3_BUCKET, _smtp_key(client_id))
-        if not data:
-            return Response({"detail": "No SMTP config found."}, status=404)
-        return Response(data, status=200)
+    def get(self, request):
+        client_id = self.get_client_id_or_403(request)
+        data = load_smtp_from_s3(client_id)
+        if data is None:
+            # Return empty stub rather than 404 so UI can show empty form
+            data = {}
+        return Response(data, status=status.HTTP_200_OK)
 
-    @transaction.atomic
-    def put(self, request, client_id: int, *args, **kwargs):
-        if not S3_BUCKET:
-            return Response({"detail": "S3 bucket not configured."}, status=500)
+    def put(self, request):
+        client_id = self.get_client_id_or_403(request)
 
-        # Inline minimal validation
-        payload = request.data if isinstance(request.data, dict) else {}
-        required = ["host", "port", "username", "password", "senderEmail"]
-        missing = [k for k in required if payload.get(k) in (None, "")]
-        if missing:
-            return Response({"detail": f"Missing required fields: {', '.join(missing)}"}, status=400)
+        if not isinstance(request.data, dict):
+            raise ValidationError({"detail": "Body must be a JSON object."})
 
-        try:
-            payload["port"] = int(payload["port"])
-        except (TypeError, ValueError):
-            return Response({"detail": "port must be an integer."}, status=400)
+        # Optionally, add a simple allowlist check:
+        # required_keys = ["host", "port", "username", "password", "use_tls", "from_email"]
+        # for k in required_keys:
+        #     if k not in request.data:
+        #         raise ValidationError({k: "This field is required."})
 
-        secure = payload.get("secure")
-        if secure not in (True, False, None):
-            return Response({"detail": "secure must be boolean."}, status=400)
-        if secure is None:
-            payload["secure"] = False  # default
-
-        _put_json(S3_BUCKET, _smtp_key(client_id), payload)
-        return Response({"detail": "SMTP config saved."}, status=200)
+        save_smtp_to_s3(client_id, request.data)
+        return Response({"ok": True}, status=status.HTTP_200_OK)
