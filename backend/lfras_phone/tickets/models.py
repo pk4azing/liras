@@ -94,3 +94,37 @@ class TicketActivity(models.Model):
     class Meta:
         db_table = "ticket_activity"
         ordering = ["-created_at"]
+
+
+class TicketHistory(models.Model):
+    """Generic audit trail entry for ticket changes."""
+    class Field(models.TextChoices):
+        TITLE = "title", "Title"
+        DESCRIPTION = "description", "Description"
+        STATUS = "status", "Status"
+        PRIORITY = "priority", "Priority"
+        ASSIGNED_TO = "assigned_to", "Assigned To"
+
+    ticket = models.ForeignKey(
+        Ticket, on_delete=models.CASCADE, related_name="history"
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ticket_changes",
+    )
+    field = models.CharField(max_length=32, choices=Field.choices)
+    old_value = models.TextField(blank=True, null=True)
+    new_value = models.TextField(blank=True, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+    note = models.TextField(blank=True, default="")
+
+    class Meta:
+        db_table = "ticket_history"
+        ordering = ("-changed_at",)
+
+    def __str__(self) -> str:
+        who = self.changed_by or "system"
+        return f"Ticket #{self.ticket_id} {self.field}: {self.old_value} → {self.new_value} by {who}"

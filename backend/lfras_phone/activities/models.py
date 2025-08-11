@@ -1,3 +1,4 @@
+# activities/models.py
 from __future__ import annotations
 
 from datetime import timedelta
@@ -11,7 +12,13 @@ from django.utils import timezone
 from accounts.models import User
 from customers.models import Customer
 
+
 US_EXPIRY_DAYS = 365
+
+
+def default_file_expiry() -> timezone.datetime:
+    """Serializable default for expires_at (no lambda so migrations can serialize it)."""
+    return timezone.now() + timedelta(days=US_EXPIRY_DAYS)
 
 
 class Activity(models.Model):
@@ -35,7 +42,12 @@ class Activity(models.Model):
     started_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(null=True, blank=True)
 
-    activity_id = models.CharField(max_length=96, unique=True, blank=True, db_index=True)
+    activity_id = models.CharField(
+        max_length=96,
+        unique=True,
+        blank=True,
+        db_index=True,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,29 +88,30 @@ class ActivityFile(models.Model):
 
     uploaded_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(
-        default=lambda: timezone.now() + timedelta(days=US_EXPIRY_DAYS),
-        help_text="Defaults to 365 days from upload."
+        default=default_file_expiry,
+        help_text="Defaults to 365 days from upload.",
     )
 
-    VALIDATION_STATUS_CHOICES = [
-        ("uploaded", "Uploaded"),
-        ("validating", "Validating"),
-        ("validated_success", "Validated (Success)"),
-        ("validated_failure", "Validation (Failure)"),
-    ]
-    validation_status = models.CharField(
-        max_length=32, choices=VALIDATION_STATUS_CHOICES, default="uploaded", db_index=True
-    )
-    validation_started_at = models.DateTimeField(null=True, blank=True)
-    validation_ended_at = models.DateTimeField(null=True, blank=True)
-    validation_notes = models.TextField(blank=True, default="")
+    # If you planned to track validation, keep this (optional)
+    # validation_status = models.CharField(
+    #     max_length=24,
+    #     choices=[
+    #         ("uploaded", "Uploaded"),
+    #         ("validating", "Validating"),
+    #         ("validated_success", "Validated (Success)"),
+    #         ("validated_failure", "Validation (Failure)"),
+    #     ],
+    #     default="uploaded",
+    #     db_index=True,
+    # )
 
     class Meta:
         ordering = ["-uploaded_at"]
         indexes = [
             models.Index(fields=["activity", "uploaded_at"]),
             models.Index(fields=["expires_at"]),
-            models.Index(fields=["validation_status"]),
+            # If you enabled validation_status above, keep this index too:
+            # models.Index(fields=["validation_status"]),
         ]
 
     def __str__(self) -> str:
@@ -132,7 +145,7 @@ def set_activity_id_and_s3_folders(sender, instance: Activity, created: bool, **
         type(instance).objects.filter(pk=instance.pk).update(activity_id=new_id)
         instance.activity_id = new_id
 
-    # Create S3 folders
+    # Create S3 folder placeholders (safe no-ops if they exist)
     s3_client = boto3.client(
         "s3",
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -147,5 +160,6 @@ def set_activity_id_and_s3_folders(sender, instance: Activity, created: bool, **
         f"{base}Files/",
         f"{base}zipped/",
     ]
+
     for folder in folders:
         s3_client.put_object(Bucket=bucket_name, Key=folder)

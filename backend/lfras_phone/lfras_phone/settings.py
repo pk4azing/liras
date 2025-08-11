@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'customers',
     'employees',
     'reports',
+    'emails',
+    'configs',
+    'utils',
     'tickets',
     'notifications',
 ]

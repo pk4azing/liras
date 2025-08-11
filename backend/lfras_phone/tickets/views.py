@@ -1,96 +1,89 @@
-from __future__ import annotations
+from rest_framework import generics, permissions
+from rest_framework.exceptions import NotFound
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-
-from .models import Ticket, TicketComment, TicketActivity
+from .models import Ticket, TicketComment, TicketHistory
 from .serializers import (
-    TicketSerializer,
+    TicketCreateSerializer,
     TicketListSerializer,
+    TicketDetailSerializer,
     TicketCommentSerializer,
-    TicketActivitySerializer,
+    TicketHistorySerializer,
 )
-from .permissions import IsTicketViewer, CanCreateTicket, CanEditTicket
 
 
-class TicketListCreateView(APIView):
-    permission_classes = [IsAuthenticated, CanCreateTicket]
+class TicketListCreateView(generics.ListCreateAPIView):
+    """
+    GET: List tickets
+    POST: Create a ticket
+    """
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        qs = Ticket.objects.filter(client_id=request.user.client_id, is_active=True)
-        status_q = request.query_params.get("status")
-        if status_q:
-            qs = qs.filter(status=status_q)
-        serializer = TicketListSerializer(qs, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Ticket.objects.all().order_by('-created_at')
 
-    def post(self, request):
-        ser = TicketSerializer(data=request.data, context={"request": request})
-        ser.is_valid(raise_exception=True)
-        ticket = ser.save()
-        return Response(TicketSerializer(ticket).data, status=status.HTTP_201_CREATED)
-
-
-class TicketDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsTicketViewer, CanEditTicket]
-
-    def get_object(self, request, pk):
-        obj = get_object_or_404(Ticket, pk=pk, is_active=True)
-        # object-level checks handled by permissions
-        self.check_object_permissions(request, obj)
-        return obj
-
-    def get(self, request, pk: int):
-        ticket = self.get_object(request, pk)
-        return Response(TicketSerializer(ticket).data)
-
-    def patch(self, request, pk: int):
-        ticket = self.get_object(request, pk)
-        ser = TicketSerializer(ticket, data=request.data, partial=True, context={"request": request})
-        ser.is_valid(raise_exception=True)
-        ticket = ser.save()
-        return Response(TicketSerializer(ticket).data)
-
-    def delete(self, request, pk: int):
-        ticket = self.get_object(request, pk)
-        # Restrict archive to CD side
-        if not getattr(request.user, "is_staff", False):
-            return Response({"detail": "Only CD users may archive tickets."}, status=status.HTTP_403_FORBIDDEN)
-        ticket.is_active = False
-        ticket.save(update_fields=["is_active"])
-        TicketActivity.objects.create(ticket=ticket, actor=request.user, action="close", note="Ticket archived")
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_serializer_class(self):
+        # Use different serializers for list vs create
+        if self.request.method == 'POST':
+            return TicketCreateSerializer
+        return TicketListSerializer
 
 
-class TicketCommentCreateListView(APIView):
-    permission_classes = [IsAuthenticated, IsTicketViewer]
+class TicketDetailView(generics.RetrieveUpdateAPIView):
+    """
+    GET: Retrieve one ticket
+    PUT/PATCH: Update ticket
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = 'pk'
 
-    def get(self, request, ticket_id: int):
-        ticket = get_object_or_404(Ticket, pk=ticket_id, is_active=True)
-        self.check_object_permissions(request, ticket)
-        ser = TicketCommentSerializer(ticket.comments.all(), many=True)
-        return Response(ser.data)
+    def get_queryset(self):
+        return Ticket.objects.all()
 
-    def post(self, request, ticket_id: int):
-        ticket = get_object_or_404(Ticket, pk=ticket_id, is_active=True)
-        self.check_object_permissions(request, ticket)
+    def get_object(self):
+        try:
+            return self.get_queryset().get(pk=self.kwargs.get(self.lookup_url_kwarg))
+        except Ticket.DoesNotExist:
+            raise NotFound('Ticket not found')
 
-        # Everyone in the tenant (CD or LD) can comment; LD must belong to same client_id (already checked)
-        ser = TicketCommentSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        comment = TicketComment.objects.create(ticket=ticket, author=request.user, body=ser.validated_data["body"])
-        TicketActivity.objects.create(ticket=ticket, actor=request.user, action="comment", note="Comment added")
-        return Response(TicketCommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+    def get_serializer_class(self):
+        if self.request.method in ('PUT', 'PATCH'):
+            return TicketCreateSerializer
+        return TicketDetailSerializer
 
 
-class TicketActivityListView(APIView):
-    permission_classes = [IsAuthenticated, IsTicketViewer]
+class TicketCommentListCreateView(generics.ListCreateAPIView):
+    """
+    GET: List comments for a ticket
+    POST: Add a comment to a ticket
+    """
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, ticket_id: int):
-        ticket = get_object_or_404(Ticket, pk=ticket_id, is_active=True)
-        self.check_object_permissions(request, ticket)
-        ser = TicketActivitySerializer(ticket.activities.all(), many=True)
-        return Response(ser.data)
+    def get_queryset(self):
+        ticket_id = self.kwargs.get('ticket_id')
+        return TicketComment.objects.filter(ticket_id=ticket_id).order_by('created_at')
+
+    def get_serializer_class(self):
+        return TicketCommentSerializer
+
+    def perform_create(self, serializer):
+        ticket_id = self.kwargs.get('ticket_id')
+        serializer.save(ticket_id=ticket_id, author=self.request.user)
+
+
+class TicketHistoryListCreateView(generics.ListCreateAPIView):
+    """
+    GET: List history entries for a ticket
+    POST: Create a history entry for a ticket
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        ticket_id = self.kwargs.get('ticket_id')
+        return TicketHistory.objects.filter(ticket_id=ticket_id).order_by('created_at')
+
+    def get_serializer_class(self):
+        return TicketHistorySerializer
+
+    def perform_create(self, serializer):
+        ticket_id = self.kwargs.get('ticket_id')
+        serializer.save(ticket_id=ticket_id, actor=self.request.user)

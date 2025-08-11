@@ -6,6 +6,8 @@ from typing import Any, Dict
 
 import boto3
 from botocore.exceptions import ClientError
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.tokens import default_token_generator
@@ -218,6 +220,50 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         except Exception:
             # swallow email errors; you can log them
             pass
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Confirms a password reset given uidb64 + token + new_password.
+    Mirrors the logic used by Django's built-in password reset flow.
+    """
+    uid = serializers.CharField(write_only=True)
+    token = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8, trim_whitespace=False)
+    re_new_password = serializers.CharField(write_only=True, min_length=8, trim_whitespace=False)
+
+    def validate(self, attrs):
+        uidb64 = attrs.get("uid")
+        token = attrs.get("token")
+        new_password = attrs.get("new_password")
+        re_new_password = attrs.get("re_new_password")
+
+        if new_password != re_new_password:
+            raise serializers.ValidationError({"re_new_password": "Passwords do not match."})
+
+        # Resolve the user from uidb64
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except Exception:
+            raise serializers.ValidationError({"uid": "Invalid user identifier."})
+
+        # Validate token
+        if not default_token_generator.check_token(user, token):
+            raise serializers.ValidationError({"token": "Invalid or expired token."})
+
+        # Run Django’s password validators
+        password_validation.validate_password(new_password, user=user)
+
+        attrs["user"] = user
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.validated_data["user"]
+        new_password = self.validated_data["new_password"]
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+        return user
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

@@ -194,7 +194,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS: list[str] = []  # for createsuperuser
 
     class Meta:
-        db_table = "cdccd_users"
+        db_table = "users"
         indexes = [
             models.Index(fields=["email"]),
             models.Index(fields=["client_id"]),
